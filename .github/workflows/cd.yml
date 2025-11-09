@@ -78,9 +78,10 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          timeout: 10s
-          script_stop: true
-          script: "echo ok"
+          timeout: 15s            # 연결 시도 최대 15초
+          command_timeout: 30s    # 명령 실행 최대 30초
+          debug: true
+          script: "echo ok && hostname && uptime"
 
       - name: Copy docker-compose.yml to Server
         uses: appleboy/scp-action@v0.1.7
