@@ -75,34 +75,30 @@ jobs:
           echo "Checking connectivity to ${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}"
           nc -vz ${{ secrets.SSH_HOST }} ${{ secrets.SSH_PORT }}
 
-      - name: Raw SSH probe (verbose, non-interactive)
+      # 배너 타임아웃/MaxStartups을 대비한 비대화형 프리체크 + 재시도
+      - name: Raw SSH probe (retry, non-interactive)
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
         run: |
           set -e
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
+          echo "$SSH_PRIVATE_KEY" > id_rsa
           chmod 600 id_rsa
-          ssh -vvv \
-            -o BatchMode=yes \
-            -o IdentitiesOnly=yes \
-            -o StrictHostKeyChecking=accept-new \
-            -o ConnectTimeout=7 \
-            -o ServerAliveInterval=5 \
-            -o ServerAliveCountMax=1 \
-            -i id_rsa -p "${{ secrets.SSH_PORT }}" \
-            "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}" \
-            'echo PROBE_OK && hostname && uptime && exit'
-        shell: bash
-
-      - name: SSH precheck (fail fast)
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          timeout: 15s
-          command_timeout: 30s
-          debug: true
-          script: "echo PROBE_OK && hostname && uptime"
+          for i in 1 2 3; do
+            if ssh -o BatchMode=yes \
+                  -o IdentitiesOnly=yes \
+                  -o StrictHostKeyChecking=accept-new \
+                  -o ConnectTimeout=7 \
+                  -o ServerAliveInterval=5 \
+                  -o ServerAliveCountMax=1 \
+                  -i id_rsa -p "${{ secrets.SSH_PORT }}" \
+                  "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}" \
+                  'echo PROBE_OK && hostname && uptime && exit'; then
+              exit 0
+            fi
+            echo "probe failed, retry $i/3"; sleep 5
+          done
+          echo "probe failed after retries"; exit 1
 
       - name: Copy docker-compose.yml to Server
         uses: appleboy/scp-action@v0.1.7
@@ -126,7 +122,6 @@ jobs:
           script: |
             set -e
             cd ~/app
-
             echo "🔐 writing .env"
             printf "%s" "${{ secrets.ENV_FILE }}" > .env
 
