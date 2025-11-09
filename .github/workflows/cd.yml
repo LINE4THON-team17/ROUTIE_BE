@@ -70,7 +70,28 @@ jobs:
           token: ${{ secrets.GIT_ACTION_TOKEN }}
           submodules: true
 
-      # 접속 불가 시 바로 실패(대기 방지)
+      - name: TCP check 22/tcp
+        run: |
+          echo "Checking connectivity to ${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}"
+          nc -vz ${{ secrets.SSH_HOST }} ${{ secrets.SSH_PORT }}
+
+      - name: Raw SSH probe (verbose)
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          set -e
+          echo "$SSH_PRIVATE_KEY" > id_rsa
+          chmod 600 id_rsa
+          ssh -vvv -o StrictHostKeyChecking=accept-new \
+              -o IdentitiesOnly=yes \
+              -i id_rsa \
+              -p "$SSH_PORT" \
+              "$SSH_USERNAME@$SSH_HOST" \
+              'echo ok && hostname && uptime'
+
       - name: SSH precheck (fail fast)
         uses: appleboy/ssh-action@v1
         with:
@@ -78,8 +99,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          timeout: 15s            # 연결 시도 최대 15초
-          command_timeout: 30s    # 명령 실행 최대 30초
+          timeout: 15s
+          command_timeout: 30s
           debug: true
           script: "echo ok && hostname && uptime"
 
