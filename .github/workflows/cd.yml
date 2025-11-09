@@ -18,7 +18,6 @@ concurrency:
 
 jobs:
   build:
-    # 이중 안전장치: 브랜치 가드
     if: contains('refs/heads/main,refs/heads/develop,refs/heads/cicd', github.ref)
     name: Build & Push Docker Image
     runs-on: ubuntu-24.04
@@ -49,8 +48,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 이미지명 소문자 강제(대문자 섞이면 invalid reference format)
-      - name: Prepare image tag
+      - name: Prepare image tag (lowercase)
         run: |
           IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest"
           echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV"
@@ -72,7 +70,7 @@ jobs:
           token: ${{ secrets.GIT_ACTION_TOKEN }}
           submodules: true
 
-      # 접속 안 되면 바로 fail → 5~10분 매달림 방지
+      # 접속 불가 시 바로 실패(대기 방지)
       - name: SSH precheck (fail fast)
         uses: appleboy/ssh-action@v1
         with:
@@ -80,7 +78,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: "echo ok"
           timeout: 10s
           script_stop: true
           script: "echo ok"
