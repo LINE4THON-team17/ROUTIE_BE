@@ -81,6 +81,9 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: "echo ok"
+          timeout: 10s
+          script_stop: true
+          script: "echo ok"
 
       - name: Copy docker-compose.yml to Server
         uses: appleboy/scp-action@v0.1.7
@@ -89,22 +92,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            set -x
-            # 1) sshd 살아있는지
-            sudo systemctl status ssh --no-pager || sudo systemctl status sshd --no-pager || true
-            # 2) 22/TCP 리슨 확인
-            sudo ss -lntp | grep :22 || true
-            # 3) 방화벽(UFW) 상태
-            sudo ufw status || true
-            # 4) 최근 인증/접속로그(배포판에 따라 경로 상이)
-            if [ -f /var/log/auth.log ]; then
-              sudo tail -n 100 /var/log/auth.log
-            elif [ -f /var/log/secure ]; then
-              sudo tail -n 100 /var/log/secure
-            else
-              echo "no auth log file"
-            fi
           source: "docker-compose.yml"
           target: "~/app"
 
@@ -115,6 +102,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          timeout: 20s
+          command_timeout: 15m
           script: |
             set -e
             cd ~/app
