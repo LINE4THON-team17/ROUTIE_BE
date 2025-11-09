@@ -1,9 +1,7 @@
-# ---------- Build stage ----------
 FROM gradle:8.10-jdk21 AS build
 WORKDIR /workspace
 
 COPY settings.gradle build.gradle ./
-# KTS면 위 줄을 build.gradle.kts / settings.gradle.kts 로 변경
 COPY gradle gradle
 COPY gradlew gradlew
 COPY gradlew.bat gradlew.bat
@@ -14,7 +12,6 @@ RUN ./gradlew --no-daemon dependencies || true
 COPY src src
 RUN ./gradlew --no-daemon clean bootJar -Pprofile=dev
 
-# ---------- Runtime ----------
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 ARG JAR_FILE=/workspace/build/libs/*.jar
