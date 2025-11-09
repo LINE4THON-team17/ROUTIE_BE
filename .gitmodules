@@ -2,3 +2,7 @@
 	path = ROUTIE_BE_config
 	url = https://github.com/LINE4THON-team17/ROUTIE_BE_config.git
 	branch = main
+[submodule "config"]
+	path = config
+	url = https://github.com/LINE4THON-team17/ROUTIE_BE_config.git
+	branch = main
