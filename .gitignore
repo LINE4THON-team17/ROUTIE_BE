@@ -46,4 +46,4 @@ src/main/resources/application.properties
 
 ### 추가: 로그 파일 ###
 *.log
-logs/
+logs/.env
