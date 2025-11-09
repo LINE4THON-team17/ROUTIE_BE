@@ -75,22 +75,22 @@ jobs:
           echo "Checking connectivity to ${{ secrets.SSH_HOST }}:${{ secrets.SSH_PORT }}"
           nc -vz ${{ secrets.SSH_HOST }} ${{ secrets.SSH_PORT }}
 
-      - name: Raw SSH probe (verbose)
-        env:
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Raw SSH probe (verbose, non-interactive)
         run: |
           set -e
-          echo "$SSH_PRIVATE_KEY" > id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > id_rsa
           chmod 600 id_rsa
-          ssh -vvv -o StrictHostKeyChecking=accept-new \
-              -o IdentitiesOnly=yes \
-              -i id_rsa \
-              -p "$SSH_PORT" \
-              "$SSH_USERNAME@$SSH_HOST" \
-              'echo ok && hostname && uptime'
+          ssh -vvv \
+            -o BatchMode=yes \
+            -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=accept-new \
+            -o ConnectTimeout=7 \
+            -o ServerAliveInterval=5 \
+            -o ServerAliveCountMax=1 \
+            -i id_rsa -p "${{ secrets.SSH_PORT }}" \
+            "${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}" \
+            'echo PROBE_OK && hostname && uptime && exit'
+        shell: bash
 
       - name: SSH precheck (fail fast)
         uses: appleboy/ssh-action@v1
@@ -102,7 +102,7 @@ jobs:
           timeout: 15s
           command_timeout: 30s
           debug: true
-          script: "echo ok && hostname && uptime"
+          script: "echo PROBE_OK && hostname && uptime"
 
       - name: Copy docker-compose.yml to Server
         uses: appleboy/scp-action@v0.1.7
