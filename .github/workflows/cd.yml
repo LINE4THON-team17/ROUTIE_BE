@@ -112,3 +112,4 @@ jobs:
 
             echo "🧹 prune"
             docker image prune -f
+            
