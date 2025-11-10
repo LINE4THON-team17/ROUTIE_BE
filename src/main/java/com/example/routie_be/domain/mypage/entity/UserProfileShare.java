@@ -1,13 +1,13 @@
 package com.example.routie_be.domain.mypage.entity;
 
 import java.time.LocalDateTime;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(
-    name = "user_profile_share",
-    indexes = { @Index(name = "idx_slug", columnList = "slug", unique = true) }
-)
+        name = "user_profile_share",
+        indexes = {@Index(name = "idx_slug", columnList = "slug", unique = true)})
 public class UserProfileShare {
 
     @Id
@@ -37,11 +37,25 @@ public class UserProfileShare {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public Long getUserId() { return userId; }
-    public String getSlug() { return slug; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public LocalDateTime getLastAccessedAt() { return lastAccessedAt; }
+    public Long getId() {
+        return id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getLastAccessedAt() {
+        return lastAccessedAt;
+    }
 
     public void setLastAccessedAt(LocalDateTime lastAccessedAt) {
         this.lastAccessedAt = lastAccessedAt;
