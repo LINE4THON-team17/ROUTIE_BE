@@ -1,8 +1,14 @@
 package com.example.routie_be.domain.mypage.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 import com.example.routie_be.domain.mypage.dto.BadgeDto;
 import com.example.routie_be.domain.mypage.service.BadgeService;
 import com.example.routie_be.global.common.CurrentUserService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -11,18 +17,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 마이페이지 - 배지 관련 컨트롤러
  *
- * 루트 등록 개수에 따라 자동으로 부여되는 배지 시스템:
- * - 1~9개 등록 → 배지 1개
- * - 10~49개 등록 → 배지 2개
- * - 50개 이상 등록 → 배지 3개
+ * <p>루트 등록 개수에 따라 자동으로 부여되는 배지 시스템: - 1~9개 등록 → 배지 1개 - 10~49개 등록 → 배지 2개 - 50개 이상 등록 → 배지 3개
  */
 @RestController
 @RequestMapping("/api")
@@ -30,17 +29,18 @@ import java.util.List;
 @Tag(name = "배지 API", description = "마이페이지에서 획득 가능한 배지 관련 API")
 public class BadgeController {
 
-  private final BadgeService badgeService;
-  private final CurrentUserService current;
+    private final BadgeService badgeService;
+    private final CurrentUserService current;
 
-  /**
-   * 내 배지 목록 조회
-   *
-   * 로그인한 사용자가 현재 보유 중인 배지 목록을 반환합니다.
-   */
-  @Operation(
-      summary = "내 배지 목록 조회",
-      description = """
+    /**
+     * 내 배지 목록 조회
+     *
+     * <p>로그인한 사용자가 현재 보유 중인 배지 목록을 반환합니다.
+     */
+    @Operation(
+            summary = "내 배지 목록 조회",
+            description =
+                    """
           로그인된 사용자의 루트 등록 개수에 따라 자동으로 배지를 반환합니다.
 
           🏅 배지 조건:
@@ -48,14 +48,19 @@ public class BadgeController {
           - 10~49개 루트 등록: 배지 2개
           - 50개 이상 루트 등록: 배지 3개
           """)
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "성공적으로 내 배지 목록을 조회했습니다.",
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(implementation = BadgeDto.class),
-              examples = @ExampleObject(value = """
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "성공적으로 내 배지 목록을 조회했습니다.",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = BadgeDto.class),
+                                        examples =
+                                                @ExampleObject(
+                                                        value =
+                                                                """
                   [
                     {
                       "id": 1,
@@ -70,36 +75,40 @@ public class BadgeController {
                       "level": 2
                     }
                   ]
-                  """)
-          )
-      )
-  })
-  @GetMapping("/users/me/badges")
-  public ResponseEntity<List<BadgeDto>> getMyBadges() {
-    Long userId = current.getUserId();
-    return ResponseEntity.ok(badgeService.myBadges(userId));
-  }
+                  """)))
+            })
+    @GetMapping("/users/me/badges")
+    public ResponseEntity<List<BadgeDto>> getMyBadges() {
+        Long userId = current.getUserId();
+        return ResponseEntity.ok(badgeService.myBadges(userId));
+    }
 
-  /**
-   * 전체 배지 정의 목록
-   *
-   * 시스템에서 정의된 전체 배지의 종류를 반환합니다.
-   */
-  @Operation(
-      summary = "전체 배지 정의 목록 조회",
-      description = """
+    /**
+     * 전체 배지 정의 목록
+     *
+     * <p>시스템에서 정의된 전체 배지의 종류를 반환합니다.
+     */
+    @Operation(
+            summary = "전체 배지 정의 목록 조회",
+            description =
+                    """
           모든 사용자가 획득할 수 있는 배지의 정의 목록을 조회합니다.
 
           각 배지는 루트 등록 개수에 따라 자동 부여됩니다.
           """)
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "전체 배지 정의 목록을 성공적으로 조회했습니다.",
-          content = @Content(
-              mediaType = "application/json",
-              schema = @Schema(implementation = BadgeDto.class),
-              examples = @ExampleObject(value = """
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "전체 배지 정의 목록을 성공적으로 조회했습니다.",
+                        content =
+                                @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(implementation = BadgeDto.class),
+                                        examples =
+                                                @ExampleObject(
+                                                        value =
+                                                                """
                   [
                     {
                       "id": 1,
@@ -120,12 +129,10 @@ public class BadgeController {
                       "level": 3
                     }
                   ]
-                  """)
-          )
-      )
-  })
-  @GetMapping("/badges")
-  public ResponseEntity<List<BadgeDto>> getBadgeDefinitions() {
-    return ResponseEntity.ok(badgeService.definitions());
-  }
+                  """)))
+            })
+    @GetMapping("/badges")
+    public ResponseEntity<List<BadgeDto>> getBadgeDefinitions() {
+        return ResponseEntity.ok(badgeService.definitions());
+    }
 }
