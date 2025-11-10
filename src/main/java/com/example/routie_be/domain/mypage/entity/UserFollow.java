@@ -24,14 +24,19 @@ public class UserFollow {
     @Column(nullable = false)
     private Long followeeId;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     protected UserFollow() {}
 
     public UserFollow(Long followerId, Long followeeId) {
         this.followerId = followerId;
         this.followeeId = followeeId;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {

@@ -24,14 +24,19 @@ public class UserBadge {
     @Column(nullable = false)
     private Long badgeId;
 
-    @Column(nullable = false)
-    private LocalDateTime grantedAt = LocalDateTime.now();
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime grantedAt;
 
     protected UserBadge() {}
 
     public UserBadge(Long userId, Long badgeId) {
         this.userId = userId;
         this.badgeId = badgeId;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.grantedAt = LocalDateTime.now();
     }
 
     public Long getId() {

@@ -20,14 +20,19 @@ public class UserSavedRoute {
     @Column(nullable = false)
     private Long routeId;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
     protected UserSavedRoute() {}
 
     public UserSavedRoute(Long userId, Long routeId) {
         this.userId = userId;
         this.routeId = routeId;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {

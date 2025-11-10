@@ -20,7 +20,9 @@ public class UserProfileShare {
     @Column(nullable = false, unique = true)
     private String slug; // ex: routie-abc123
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
     private LocalDateTime lastAccessedAt;
 
     protected UserProfileShare() {}
@@ -28,6 +30,11 @@ public class UserProfileShare {
     public UserProfileShare(Long userId, String slug) {
         this.userId = userId;
         this.slug = slug;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {
