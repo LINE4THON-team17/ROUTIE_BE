@@ -8,29 +8,48 @@ concurrency:
   group: cd-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    if: >
+      ${{
+        github.event.workflow_run.conclusion == 'success' &&
+        contains(fromJson('["main","develop","cicd"]'), github.event.workflow_run.head_branch)
+      }}
 
     steps:
-      - name: Checkout (with submodules)
+      - name: Checkout (exact commit from CI)
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GIT_ACTION_TOKEN }}
           submodules: true
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
+          cache: gradle
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v2
 
       - name: Grant execute permission for Gradlew
         run: chmod +x gradlew
 
       - name: Build JAR
         run: ./gradlew clean bootJar -Pprofile=dev
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Docker Hub Login
         uses: docker/login-action@v3
@@ -41,7 +60,8 @@ jobs:
       - name: Build & Push (lowercase image tag)
         run: |
           IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest"
-          echo "IMAGE=${IMAGE,,}" >> "$GITHUB_ENV"
+          IMAGE=$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
           docker buildx build -t "$IMAGE" --push .
 
   deploy:
@@ -50,11 +70,12 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Checkout (with submodules)
+      - name: Checkout (same commit)
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GIT_ACTION_TOKEN }}
           submodules: true
+          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Copy docker-compose.yml to Server
         uses: appleboy/scp-action@v0.1.7
@@ -73,24 +94,29 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          timeout: 30s
+          timeout: 45s
           command_timeout: 10m
           script: |
-            set -e
+            set -euo pipefail
             cd ~/app
 
-            echo "📄 write .env"
-            printf "%s" "${{ secrets.ENV_FILE }}" > .env
-
-            echo "🛠 docker compose up"
-            docker compose --env-file .env pull || true
-            docker compose --env-file .env up -d --build
-
-            echo "⏱ health check (local)"
-            for i in 1 2 3 4 5; do
-              curl -fsS --max-time 3 http://localhost:8080/actuator/health && break
-              sleep 3
-            done
-
-            echo "🧼 prune old images"
-            docker image prune -f
+            echo "📄 Writing .env..."
+            cat > .env <<'ENVEOF'
+  ${{ secrets.ENV_FILE }}
+  ENVEOF
+  
+  echo "🛠 Running docker compose..."
+  docker compose --env-file .env pull || true
+  docker compose --env-file .env up -d --build
+  
+  echo "⏱ Health check (local)..."
+  for i in {1..5}; do
+  if curl -fsS --max-time 3 http://localhost:8080/actuator/health; then
+  echo "✅ Application healthy!"
+  break
+  fi
+  sleep 3
+  done
+  
+  echo "🧼 Cleaning up old images..."
+  docker image prune -f
