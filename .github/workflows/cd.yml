@@ -3,17 +3,10 @@ name: CD
 on:
   push:
     branches: [ "main", "develop", "cicd" ]
-  workflow_dispatch: {}
-
-concurrency:
-  group: cd-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
@@ -33,27 +26,19 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean bootJar -Pprofile=dev
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Docker Hub Login
-        uses: docker/login-action@v3
+        uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Docker build & push (lowercase image tag)
+      - name: Docker build & push
         run: |
-          RAW="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest"
-          IMAGE=$(echo "$RAW" | tr '[:upper:]' '[:lower:]')
-          echo "IMAGE=$IMAGE"
-          docker buildx build -t "$IMAGE" --push .
+          docker buildx build -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }} --push .
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    timeout-minutes: 15
-
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
@@ -61,8 +46,8 @@ jobs:
           token: ${{ secrets.GIT_ACTION_TOKEN }}
           submodules: true
 
-      - name: Copy docker-compose.yml to Server
-        uses: appleboy/scp-action@v0.1.7
+      - name: Copy compose to Server
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
@@ -72,22 +57,21 @@ jobs:
           target: "~/app"
 
       - name: Deploy on server
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            set -e
             cd ~/app
 
             echo "📄 .env 생성 중..."
-            printf "%s" "${{ secrets.ENV_FILE }}" > .env
+            printf "${{ secrets.ENV_FILE }}" > .env
 
             echo "🛠️ Docker 재배포 중"
-            docker compose down || true
-            docker compose pull || true
+            docker compose down
+            docker compose pull
             docker compose up -d --build
 
             echo "🧼 사용하지 않는 이미지 정리"
