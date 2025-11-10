@@ -1,41 +1,63 @@
 package com.example.routie_be.domain.mypage.entity;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import jakarta.persistence.*;
+
 @Entity
-@Table(name = "user_profile_share", indexes = {
-    @Index(name = "idx_slug", columnList = "slug", unique = true)
-})
+@Table(
+        name = "user_profile_share",
+        indexes = {@Index(name = "idx_slug", columnList = "slug", unique = true)})
 public class UserProfileShare {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false)
-  private Long userId;
+    @Column(nullable = false)
+    private Long userId;
 
-  @Column(nullable = false, unique = true)
-  private String slug; // ex: routie-abc123
+    @Column(nullable = false, unique = true)
+    private String slug; // ex: routie-abc123
 
-  private LocalDateTime createdAt = LocalDateTime.now();
-  private LocalDateTime lastAccessedAt;
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-  protected UserProfileShare() {}
+    private LocalDateTime lastAccessedAt;
 
-  public UserProfileShare(Long userId, String slug) {
-    this.userId = userId;
-    this.slug = slug;
-  }
+    protected UserProfileShare() {}
 
-  public Long getId() { return id; }
-  public Long getUserId() { return userId; }
-  public String getSlug() { return slug; }
-  public LocalDateTime getCreatedAt() { return createdAt; }
-  public LocalDateTime getLastAccessedAt() { return lastAccessedAt; }
+    public UserProfileShare(Long userId, String slug) {
+        this.userId = userId;
+        this.slug = slug;
+    }
 
-  public void setLastAccessedAt(LocalDateTime lastAccessedAt) {
-    this.lastAccessedAt = lastAccessedAt;
-  }
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public String getSlug() {
+        return slug;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public LocalDateTime getLastAccessedAt() {
+        return lastAccessedAt;
+    }
+
+    public void setLastAccessedAt(LocalDateTime lastAccessedAt) {
+        this.lastAccessedAt = lastAccessedAt;
+    }
 }
