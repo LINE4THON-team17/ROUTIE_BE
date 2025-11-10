@@ -3,6 +3,7 @@ name: CD
 on:
   push:
     branches: [ "main", "develop", "cicd" ]
+  workflow_dispatch: {}
 
 concurrency:
   group: cd-${{ github.ref }}
@@ -15,19 +16,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: >
-      ${{
-        github.event.workflow_run.conclusion == 'success' &&
-        contains(fromJson('["main","develop","cicd"]'), github.event.workflow_run.head_branch)
-      }}
 
     steps:
-      - name: Checkout (exact commit from CI)
+      - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GIT_ACTION_TOKEN }}
           submodules: true
-          ref: ${{ github.event.workflow_run.head_sha }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -42,11 +37,8 @@ jobs:
       - name: Grant execute permission for Gradlew
         run: chmod +x gradlew
 
-      - name: Build JAR
+      - name: Build with Gradle
         run: ./gradlew clean bootJar -Pprofile=dev
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -57,11 +49,11 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build & Push (lowercase image tag)
+      - name: Docker build & push (lowercase image tag)
         run: |
-          IMAGE="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest"
-          IMAGE=$(echo "$IMAGE" | tr '[:upper:]' '[:lower:]')
-          echo "IMAGE=$IMAGE" >> "$GITHUB_ENV"
+          RAW="${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest"
+          IMAGE=$(echo "$RAW" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE=$IMAGE"
           docker buildx build -t "$IMAGE" --push .
 
   deploy:
@@ -70,12 +62,21 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Checkout (same commit)
+      - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GIT_ACTION_TOKEN }}
           submodules: true
-          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Ensure target dir on server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            mkdir -p ~/app
 
       - name: Copy docker-compose.yml to Server
         uses: appleboy/scp-action@v0.1.7
@@ -94,8 +95,6 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          timeout: 45s
-          command_timeout: 10m
           script: |
             set -euo pipefail
             cd ~/app
