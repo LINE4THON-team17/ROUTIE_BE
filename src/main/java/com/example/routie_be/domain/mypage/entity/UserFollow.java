@@ -1,17 +1,15 @@
 package com.example.routie_be.domain.mypage.entity;
 
 import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
 
 @Entity
 @Table(
-        name = "user_follow",
-        uniqueConstraints = {
-            @UniqueConstraint(
-                    name = "uk_follow",
-                    columnNames = {"followerId", "followeeId"})
-        })
+    name = "user_follow",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_follow", columnNames = {"followerId", "followeeId"})
+    }
+)
 public class UserFollow {
 
     @Id
@@ -39,19 +37,8 @@ public class UserFollow {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public Long getFollowerId() {
-        return followerId;
-    }
-
-    public Long getFolloweeId() {
-        return followeeId;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public Long getId() { return id; }
+    public Long getFollowerId() { return followerId; }
+    public Long getFolloweeId() { return followeeId; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }

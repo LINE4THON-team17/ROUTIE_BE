@@ -1,13 +1,13 @@
 package com.example.routie_be.domain.mypage.entity;
 
 import java.time.LocalDateTime;
-
 import jakarta.persistence.*;
 
 @Entity
 @Table(
-        name = "user_saved_route",
-        indexes = {@Index(name = "idx_usr_user_created", columnList = "userId,createdAt")})
+    name = "user_saved_route",
+    indexes = { @Index(name = "idx_usr_user_created", columnList = "userId,createdAt") }
+)
 public class UserSavedRoute {
 
     @Id
@@ -35,19 +35,8 @@ public class UserSavedRoute {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public Long getRouteId() {
-        return routeId;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public Long getId() { return id; }
+    public Long getUserId() { return userId; }
+    public Long getRouteId() { return routeId; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
 }
