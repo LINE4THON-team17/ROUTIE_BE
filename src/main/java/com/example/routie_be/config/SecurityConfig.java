@@ -8,20 +8,18 @@ import org.springframework.security.web.SecurityFilterChain;
 @Configuration
 public class SecurityConfig {
 
-  @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/swagger-ui/**",
-                "/v3/api-docs/**",
-                "/actuator/**"
-            ).permitAll()
-            .anyRequest().permitAll()
-        )
-        .formLogin(login -> login.disable())
-        .httpBasic(basic -> basic.disable());
-    return http.build();
-  }
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+                .authorizeHttpRequests(
+                        auth ->
+                                auth.requestMatchers(
+                                                "/swagger-ui/**", "/v3/api-docs/**", "/actuator/**")
+                                        .permitAll()
+                                        .anyRequest()
+                                        .permitAll())
+                .formLogin(login -> login.disable())
+                .httpBasic(basic -> basic.disable());
+        return http.build();
+    }
 }

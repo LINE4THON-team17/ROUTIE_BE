@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.5.7'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.diffplug.spotless' version '6.25.0'
 }
 
 group = 'com.example'
@@ -42,4 +43,23 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        target 'src/**/*.java'
+        // 구글 포맷(AOSP) 예시 — 원하면 eclipse(), prettier() 등으로 변경 가능
+        googleJavaFormat('1.17.0').aosp()
+        importOrder 'java', 'javax', 'org', 'com', ''  // 필요시 조정
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    // Gradle 스크립트까지 체크하려면:
+    format('gradle') {
+        target '*.gradle', 'gradle/**/*.gradle'
+        indentWithSpaces(2)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
