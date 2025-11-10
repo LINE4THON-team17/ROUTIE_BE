@@ -9,9 +9,6 @@ concurrency:
   group: cd-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,10 +26,6 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-          cache: gradle
-
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v2
 
       - name: Grant execute permission for Gradlew
         run: chmod +x gradlew
@@ -68,16 +61,6 @@ jobs:
           token: ${{ secrets.GIT_ACTION_TOKEN }}
           submodules: true
 
-      - name: Ensure target dir on server
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            mkdir -p ~/app
-
       - name: Copy docker-compose.yml to Server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -96,26 +79,16 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            set -euo pipefail
+            set -e
             cd ~/app
 
-            echo "📄 Writing .env..."
-            cat > .env <<'ENVEOF'
-  ${{ secrets.ENV_FILE }}
-  ENVEOF
-  
-  echo "🛠 Running docker compose..."
-  docker compose --env-file .env pull || true
-  docker compose --env-file .env up -d --build
-  
-  echo "⏱ Health check (local)..."
-  for i in {1..5}; do
-  if curl -fsS --max-time 3 http://localhost:8080/actuator/health; then
-  echo "✅ Application healthy!"
-  break
-  fi
-  sleep 3
-  done
-  
-  echo "🧼 Cleaning up old images..."
-  docker image prune -f
+            echo "📄 .env 생성 중..."
+            printf "%s" "${{ secrets.ENV_FILE }}" > .env
+
+            echo "🛠️ Docker 재배포 중"
+            docker compose down || true
+            docker compose pull || true
+            docker compose up -d --build
+
+            echo "🧼 사용하지 않는 이미지 정리"
+            docker image prune -f
