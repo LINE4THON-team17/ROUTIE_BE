@@ -6,29 +6,47 @@ import jakarta.persistence.*;
 @Table(name = "badge")
 public class Badge {
 
-  @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-  @Column(nullable = false, unique = true)
-  private String name;
+    @Column(nullable = false, unique = true)
+    private String name;
 
-  private String description;
-  private Integer minRoutes;
-  private Integer maxRoutes;
+    private String description;
 
-  protected Badge() {}
+    @Column(nullable = false)
+    private Integer minRoutes;
 
-  public Badge(String name, String description, Integer minRoutes, Integer maxRoutes) {
-    this.name = name;
-    this.description = description;
-    this.minRoutes = minRoutes;
-    this.maxRoutes = maxRoutes;
-  }
+    @Column(nullable = false)
+    private Integer maxRoutes;
 
-  public Long getId() { return id; }
-  public String getName() { return name; }
-  public String getDescription() { return description; }
-  public Integer getMinRoutes() { return minRoutes; }
-  public Integer getMaxRoutes() { return maxRoutes; }
+    protected Badge() {}
+
+    public Badge(String name, String description, Integer minRoutes, Integer maxRoutes) {
+        this.name = name;
+        this.description = description;
+        this.minRoutes = minRoutes;
+        this.maxRoutes = maxRoutes;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public Integer getMinRoutes() {
+        return minRoutes;
+    }
+
+    public Integer getMaxRoutes() {
+        return maxRoutes;
+    }
 }

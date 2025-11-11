@@ -1,52 +1,82 @@
 package com.example.routie_be.domain.mypage.service;
 
-import com.example.routie_be.domain.mypage.dto.*;
-import com.example.routie_be.domain.mypage.entity.User;
-import com.example.routie_be.domain.mypage.repository.*;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import com.example.routie_be.domain.mypage.dto.*;
+import com.example.routie_be.domain.mypage.entity.User;
+import com.example.routie_be.domain.mypage.entity.UserSavedRoute;
+import com.example.routie_be.domain.mypage.repository.FollowRepo;
+import com.example.routie_be.domain.mypage.repository.SavedRouteRepo;
+import com.example.routie_be.domain.mypage.repository.UserRepo;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UsersService {
-  private final UserRepo userRepo;
-  private final SavedRouteRepo savedRouteRepo;
-  private final FollowRepo followRepo;
 
-  public UserMeResponse getProfile(Long userId) {
-    User user = userRepo.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    private final UserRepo userRepo;
+    private final SavedRouteRepo savedRouteRepo;
+    private final FollowRepo followRepo;
 
-    long routesCount = 0; // TODO: Route 테이블 연동 후 수정
-    long savedCount = savedRouteRepo.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(0, 1)).getTotalElements();
-    long friendsCount = followRepo.countByFollowerId(userId);
+    public UserMeResponse getProfile(Long userId) {
+        User u =
+                userRepo.findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-    return new UserMeResponse(
-        user.getId(),
-        user.getName(),
-        user.getProfileImageUrl(),
-        routesCount,
-        savedCount,
-        friendsCount
-    );
-  }
+        long routesCount = 0L; // TODO: Route 테이블 연동 후 수정
+        // Saved 개수는 레포 카운트 메서드 사용(권장). 없다면 Page#getTotalElements로 대체.
+        long savedCount = savedRouteRepo.countByUserId(userId);
+        long friendsCount = followRepo.countByFolloweeId(userId);
 
-  public UserMeResponse updateProfile(Long userId, UserUpdateRequest dto) {
-    User user = userRepo.findById(userId)
-        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        return new UserMeResponse(
+                u.getId(),
+                u.getName(),
+                u.getProfileImageUrl(),
+                routesCount,
+                savedCount,
+                friendsCount);
+    }
 
-    if (dto.name() != null) user.setName(dto.name());
-    if (dto.profileImageUrl() != null) user.setProfileImageUrl(dto.profileImageUrl());
-    userRepo.save(user);
+    @Transactional
+    public UserMeResponse updateProfile(Long userId, UserUpdateRequest dto) {
+        User u =
+                userRepo.findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-    return getProfile(userId);
-  }
+        if (dto.name() != null && !dto.name().isBlank()) {
+            u.setName(dto.name());
+        }
+        if (dto.profileImageUrl() != null && !dto.profileImageUrl().isBlank()) {
+            u.setProfileImageUrl(dto.profileImageUrl());
+        }
 
-  public List<RouteSummary> getSavedRoutes(Long userId, int page, int size) {
-    // TODO: routes 팀 연동 시 RouteSummaryMapper 구현
-    return List.of();
-  }
+        // 응답은 기존 스펙 유지
+        long routesCount = 0L;
+        long savedCount = savedRouteRepo.countByUserId(userId);
+        long friendsCount = followRepo.countByFolloweeId(userId);
+
+        return new UserMeResponse(
+                u.getId(),
+                u.getName(),
+                u.getProfileImageUrl(),
+                routesCount,
+                savedCount,
+                friendsCount);
+    }
+
+    public List<RouteSummary> getSavedRoutes(Long userId, int page, int size) {
+        Page<UserSavedRoute> p =
+                savedRouteRepo.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
+
+        // TODO: routes 연동 시 실제 타이틀 매핑
+        return p.map(r -> new RouteSummary(r.getRouteId(), "루트 제목(추후 routes 연동)", r.getCreatedAt()))
+                .getContent();
+    }
 }
