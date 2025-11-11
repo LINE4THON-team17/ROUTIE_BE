@@ -1,10 +1,11 @@
 package com.example.routie_be.domain.route.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
+
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Getter
@@ -43,7 +44,8 @@ public class Route {
     private Set<Place> places = new HashSet<>();
 
     @Builder
-    public Route(Long userId, String title, String target, Set<String> keywords, String visitedDate) {
+    public Route(
+            Long userId, String title, String target, Set<String> keywords, String visitedDate) {
         this.userId = userId;
         this.title = title;
         this.target = target;

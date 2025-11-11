@@ -41,11 +41,18 @@ public class Place {
     @Column(name = "photo_url", length = 500)
     private String photoUrl;
 
-    @Lob
-    private String review;
+    @Lob private String review;
 
     @Builder
-    public Place(Integer order, String name, String category, String address, Double latitude, Double longitude, String photoUrl, String review) {
+    public Place(
+            Integer order,
+            String name,
+            String category,
+            String address,
+            Double latitude,
+            Double longitude,
+            String photoUrl,
+            String review) {
         this.order = order;
         this.name = name;
         this.category = category;

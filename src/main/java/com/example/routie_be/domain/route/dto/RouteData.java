@@ -10,5 +10,4 @@ public class RouteData {
     private Long routeId;
     private String createdAt;
     private String redirectUrl;
-
 }

@@ -1,14 +1,16 @@
 package com.example.routie_be.domain.map.controller;
 
-import com.example.routie_be.domain.map.dto.MapConfigDto;
-import com.example.routie_be.global.common.ApiResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.example.routie_be.domain.map.dto.MapConfigDto;
+import com.example.routie_be.global.common.ApiResponse;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,18 +23,14 @@ public class MapConfigController {
 
     @GetMapping("/map")
     public ResponseEntity<ApiResponse<MapConfigDto>> getMapConfig() {
-        MapConfigDto config = MapConfigDto.builder()
-                .mapApiKey(mapApiKey)
-                .defaultLat(37.5665) // 서울 시청 위도
-                .defaultLng(126.9780) // 서울 시청 경도
-                .build();
+        MapConfigDto config =
+                MapConfigDto.builder()
+                        .mapApiKey(mapApiKey)
+                        .defaultLat(37.5665) // 서울 시청 위도
+                        .defaultLng(126.9780) // 서울 시청 경도
+                        .build();
 
-        return ResponseEntity.status(HttpStatus.OK).body(
-                new ApiResponse<>(
-                        HttpStatus.OK.value(),
-                        "지도 설정 정보 조회 성공",
-                        config
-                )
-        );
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(HttpStatus.OK.value(), "지도 설정 정보 조회 성공", config));
     }
 }
