@@ -35,7 +35,7 @@ public class BadgeController {
     /**
      * 내 배지 목록 조회
      *
-     * <p>로그인한 사용자가 현재 보유 중인 배지 목록을 반환합니다.
+     * <p>로그인한 사용자가 현재 보유 중인 배지를 반환합니다.
      */
     @Operation(
             summary = "내 배지 목록 조회",
