@@ -27,4 +27,6 @@ public class PlaceDto {
     private String photoUrl;
 
     private String review; // 장소당 단일 리뷰
+
+
 }

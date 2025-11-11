@@ -10,8 +10,12 @@ import com.example.routie_be.domain.auth.dto.SignupResponse;
 import com.example.routie_be.domain.auth.service.AuthService;
 import com.example.routie_be.global.common.ApiResponse;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/auth")
+@Tag(name = "Auth", description = "회원가입, 로그인, 로그아웃 관련 API")
 public class AuthController {
 
     private final AuthService authService;
@@ -20,6 +24,7 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @Operation(summary = "회원가입", description = "이메일, 비밀번호, 닉네임을 입력받아 회원을 등록합니다.")
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
         try {
@@ -33,13 +38,13 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인하고, JWT 토큰을 발급받습니다.")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
             LoginResponse response = authService.login(request);
             return ResponseEntity.ok(new ApiResponse<>(200, "로그인 성공", response));
         } catch (IllegalArgumentException e) {
-            // 이메일이나 비밀번호 오류
             return ResponseEntity.status(401).body(new ApiResponse<>(401, e.getMessage(), null));
         } catch (Exception e) {
             return ResponseEntity.status(400)
@@ -47,6 +52,7 @@ public class AuthController {
         }
     }
 
+    @Operation(summary = "로그아웃", description = "JWT는 서버에서 무효화하지 않고, 클라이언트 측에서 삭제하도록 합니다.")
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String bearerToken) {
         return ResponseEntity.ok(new ApiResponse<>(200, "로그아웃 완료 (JWT는 클라이언트에서 삭제)", null));

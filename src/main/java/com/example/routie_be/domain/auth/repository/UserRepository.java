@@ -1,13 +1,11 @@
 package com.example.routie_be.domain.auth.repository;
 
-import java.util.Optional;
-
+import com.example.routie_be.domain.auth.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.routie_be.domain.auth.entity.User;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
-
     boolean existsByEmail(String email);
 }

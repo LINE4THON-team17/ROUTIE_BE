@@ -1,11 +1,14 @@
 package com.example.routie_be.domain.route.entity;
 
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
-
-import jakarta.persistence.*;
-import lombok.*;
 
 @Entity
 @Getter
@@ -27,7 +30,6 @@ public class Route {
     @Column(length = 200)
     private String target;
 
-    // 💡 List -> Set으로 변경: Fetch Join 오류 해결
     @ElementCollection
     @CollectionTable(name = "route_keyword", joinColumns = @JoinColumn(name = "route_id"))
     @Column(name = "keyword")
@@ -39,7 +41,6 @@ public class Route {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // 💡 List -> Set으로 변경: Fetch Join 오류 해결
     @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Place> places = new HashSet<>();
 
