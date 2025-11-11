@@ -7,6 +7,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.set_image_tag.outputs.image_tag }}
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4
@@ -27,17 +29,25 @@ jobs:
         run: ./gradlew clean bootJar -Pprofile=dev
 
       - name: Set IMAGE_TAG
-        run: echo "IMAGE_TAG=v$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
+        id: set_image_tag
+        run: |
+          echo "IMAGE_TAG=v$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
+          echo "image_tag=v$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
+
+      - name: Setup Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Docker login
-        run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Docker buildx build & push (multi-arch)
         run: |
-          docker buildx create --use || true
           docker buildx build \
             --platform linux/amd64,linux/arm64 \
+            -f Dockerfile \
             -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:${{ env.IMAGE_TAG }} \
             -t ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPO }}:latest \
             --push .
@@ -73,15 +83,16 @@ jobs:
             cd ~/app
 
             echo "📄 .env 생성 중..."
-            printf "${{ secrets.ENV_FILE }}" > .env
-
+            cat > .env <<'EOF'
+            ${{ secrets.ENV_FILE }}
+            EOF
+            
             echo "🛠️ Docker 재배포 중"
-            export IMAGE_TAG=${{ env.IMAGE_TAG }}
-            sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=$IMAGE_TAG/" .env
-
-            docker compose down
-            docker compose pull
-            docker compose up -d --build
-
+            export IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
+            sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG}/" .env
+            
+            docker compose pull app
+            docker compose up -d --force-recreate app
+            
             echo "🧼 사용하지 않는 이미지 정리"
             docker image prune -f
