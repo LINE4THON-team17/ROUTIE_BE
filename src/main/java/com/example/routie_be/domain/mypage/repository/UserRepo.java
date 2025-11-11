@@ -5,10 +5,10 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.routie_be.domain.mypage.entity.User;
+import com.example.routie_be.domain.mypage.entity.MypageUser;
 
-public interface UserRepo extends JpaRepository<User, Long> {
-    Optional<User> findByEmail(String email);
+public interface UserRepo extends JpaRepository<MypageUser, Long> {
+    Optional<MypageUser> findByEmail(String email);
 
-    List<User> findByIdIn(List<Long> ids);
+    List<MypageUser> findByIdIn(List<Long> ids);
 }

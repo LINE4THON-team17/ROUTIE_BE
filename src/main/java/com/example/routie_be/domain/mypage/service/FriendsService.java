@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.routie_be.domain.mypage.dto.FollowStatusDto;
 import com.example.routie_be.domain.mypage.dto.FriendDto;
-import com.example.routie_be.domain.mypage.entity.User;
+import com.example.routie_be.domain.mypage.entity.MypageUser;
 import com.example.routie_be.domain.mypage.entity.UserFollow;
 import com.example.routie_be.domain.mypage.repository.FollowRepo;
 import com.example.routie_be.domain.mypage.repository.UserRepo;
@@ -31,8 +31,8 @@ public class FriendsService {
 
         List<Long> ids = follows.stream().map(UserFollow::getFolloweeId).distinct().toList();
 
-        Map<Long, User> userMap =
-                userRepo.findByIdIn(ids).stream().collect(Collectors.toMap(User::getId, u -> u));
+        Map<Long, MypageUser> userMap =
+                userRepo.findByIdIn(ids).stream().collect(Collectors.toMap(MypageUser::getId, u -> u));
 
         return follows.stream()
                 .map(UserFollow::getFolloweeId)

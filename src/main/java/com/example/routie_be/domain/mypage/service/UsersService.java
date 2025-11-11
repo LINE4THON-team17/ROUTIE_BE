@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.routie_be.domain.mypage.dto.*;
-import com.example.routie_be.domain.mypage.entity.User;
+import com.example.routie_be.domain.mypage.entity.MypageUser;
 import com.example.routie_be.domain.mypage.entity.UserSavedRoute;
 import com.example.routie_be.domain.mypage.repository.FollowRepo;
 import com.example.routie_be.domain.mypage.repository.SavedRouteRepo;
@@ -26,7 +26,7 @@ public class UsersService {
     private final FollowRepo followRepo;
 
     public UserMeResponse getProfile(Long userId) {
-        User u =
+        MypageUser u =
                 userRepo.findById(userId)
                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
@@ -46,7 +46,7 @@ public class UsersService {
 
     @Transactional
     public UserMeResponse updateProfile(Long userId, UserUpdateRequest dto) {
-        User u =
+        MypageUser u =
                 userRepo.findById(userId)
                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 

@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class MypageUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,9 +28,9 @@ public class User {
         this.createdAt = LocalDateTime.now();
     }
 
-    protected User() {}
+    protected MypageUser() {}
 
-    public User(String email, String name) {
+    public MypageUser(String email, String name) {
         this.email = email;
         this.name = name;
     }
