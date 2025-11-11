@@ -28,11 +28,12 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew clean bootJar -Pprofile=dev
 
-      - name: Set IMAGE_TAG
+      - name: Set IMAGE_TAG (single source of truth)
         id: set_image_tag
         run: |
-          echo "IMAGE_TAG=v$(date +%Y%m%d-%H%M)" >> $GITHUB_ENV
-          echo "image_tag=v$(date +%Y%m%d-%H%M)" >> $GITHUB_OUTPUT
+          TAG="v$(date +%Y%m%d-%H%M)"
+          echo "IMAGE_TAG=$TAG" >> "$GITHUB_ENV"
+          echo "image_tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Setup Buildx
         uses: docker/setup-buildx-action@v3
@@ -80,6 +81,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            set -e
             cd ~/app
 
             echo "📄 .env 생성 중..."
@@ -91,6 +93,7 @@ jobs:
             export IMAGE_TAG="${{ needs.build.outputs.image_tag }}"
             sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG}/" .env
             
+            # 필요한 환경변수 경고 억제(옵션): MYSQL_ROOT_PASSWORD 등 .env에 포함돼 있어야 함
             docker compose pull app
             docker compose up -d --force-recreate app
             
