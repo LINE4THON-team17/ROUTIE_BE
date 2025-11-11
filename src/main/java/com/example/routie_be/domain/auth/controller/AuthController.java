@@ -1,5 +1,6 @@
 package com.example.routie_be.domain.auth.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +27,7 @@ public class AuthController {
 
     @Operation(summary = "회원가입", description = "이메일, 비밀번호, 닉네임을 입력받아 회원을 등록합니다.")
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@RequestBody SignupRequest request) {
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
         try {
             SignupResponse response = authService.signup(request);
             return ResponseEntity.status(201).body(new ApiResponse<>(201, "회원가입 성공", response));
