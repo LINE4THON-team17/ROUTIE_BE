@@ -22,14 +22,11 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class KakaoMapService {
-
-    // application.yml에서 키를 참조하며, 값이 없을 경우 기본값 사용
     @Value("${KAKAO_REST_API_KEY:default_rest_key}")
     private String kakaoRestApiKey;
 
     private final String KAKAO_API_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
 
-    // 💡 Spring Bean으로 등록된 RestTemplate과 ObjectMapper를 주입받습니다.
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
@@ -42,7 +39,6 @@ public class KakaoMapService {
         System.out.println("DEBUG URI: " + uri);
 
         HttpHeaders headers = new HttpHeaders();
-        // 💡 주입받은 키 값의 앞뒤 공백을 제거(trim())하고 헤더에 설정합니다.
         headers.set("Authorization", "KakaoAK " + kakaoRestApiKey.trim());
 
         HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -56,17 +52,14 @@ public class KakaoMapService {
 
             System.out.println("Kakao API Raw Response: " + jsonBody);
 
-            // 1. 전체 응답 JSON (Map<String, Object>) 파싱
             Map<String, Object> responseMap =
                     objectMapper.readValue(jsonBody, new TypeReference<Map<String, Object>>() {});
 
-            // 2. "documents" 필드를 안전하게 캐스팅하여 리스트를 가져옵니다.
             List<Map<String, Object>> documents =
                     (List<Map<String, Object>>) responseMap.get("documents");
 
             if (documents == null || documents.isEmpty()) return Collections.emptyList();
 
-            // 3. 추출된 데이터를 PlaceSelectionDto로 변환
             return documents.stream()
                     .map(
                             doc ->

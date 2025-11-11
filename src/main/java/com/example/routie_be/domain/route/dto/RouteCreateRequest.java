@@ -23,7 +23,7 @@ public class RouteCreateRequest {
 
     private String visitedDate;
 
-    @Valid // List 내부의 DTO 유효성 검사를 수행하도록 지정
+    @Valid
     @NotEmpty(message = "장소(places)는 최소 하나 이상이어야 합니다.")
     @Size(min = 1, message = "장소(places)는 최소 하나 이상이어야 합니다.")
     private List<PlaceDto> places;

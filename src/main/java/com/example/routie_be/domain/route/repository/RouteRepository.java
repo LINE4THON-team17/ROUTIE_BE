@@ -9,7 +9,6 @@ import org.springframework.data.repository.query.Param;
 
 import com.example.routie_be.domain.route.entity.Route;
 
-// Route 엔티티와 Long 타입의 ID를 사용하는 Repository 인터페이스
 public interface RouteRepository extends JpaRepository<Route, Long> {
 
     @Query(

@@ -15,7 +15,6 @@ public class Place {
     @Column(name = "place_id")
     private Long placeId;
 
-    // Route와의 Many-to-One 관계
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "route_id", nullable = false)
     private Route route;
@@ -63,7 +62,6 @@ public class Place {
         this.review = review;
     }
 
-    // Route 연관 관계 설정을 위한 Setter
     public void setRoute(Route route) {
         this.route = route;
     }

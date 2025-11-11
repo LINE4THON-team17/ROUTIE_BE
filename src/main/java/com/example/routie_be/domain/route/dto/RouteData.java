@@ -6,7 +6,6 @@ import lombok.Getter;
 @Getter
 @Builder
 public class RouteData {
-
     private Long routeId;
     private String createdAt;
     private String redirectUrl;
