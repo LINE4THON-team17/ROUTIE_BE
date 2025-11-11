@@ -1,4 +1,4 @@
-package com.example.routie_be.auth.entity;
+package com.example.routie_be.domain.auth.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.example.routie_be.auth.dto;
+package com.example.routie_be.domain.auth.dto;
 
 import lombok.Getter;
 import lombok.Setter;

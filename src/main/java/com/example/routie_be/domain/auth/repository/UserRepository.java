@@ -1,6 +1,6 @@
-package com.example.routie_be.auth.repository;
+package com.example.routie_be.domain.auth.repository;
 
-import com.example.routie_be.auth.entity.User;
+import com.example.routie_be.domain.auth.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

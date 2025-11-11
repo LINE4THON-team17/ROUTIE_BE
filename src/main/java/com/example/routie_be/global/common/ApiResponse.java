@@ -1,4 +1,4 @@
-package com.example.routie_be.auth.controller;
+package com.example.routie_be.global.common;
 
 import lombok.Getter;
 

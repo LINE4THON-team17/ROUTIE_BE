@@ -1,11 +1,11 @@
-package com.example.routie_be.auth.controller;
+package com.example.routie_be.domain.auth.controller;
 
-
-import com.example.routie_be.auth.dto.LoginRequest;
-import com.example.routie_be.auth.dto.LoginResponse;
-import com.example.routie_be.auth.dto.SignupRequest;
-import com.example.routie_be.auth.dto.SignupResponse;
-import com.example.routie_be.auth.service.AuthService;
+import com.example.routie_be.domain.auth.dto.LoginRequest;
+import com.example.routie_be.domain.auth.dto.LoginResponse;
+import com.example.routie_be.domain.auth.dto.SignupRequest;
+import com.example.routie_be.domain.auth.dto.SignupResponse;
+import com.example.routie_be.domain.auth.service.AuthService;
+import com.example.routie_be.global.common.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,15 +57,9 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String bearerToken) {
-
-        // "Bearer " 접두사 제거 (Access Token)
-        String accessToken = bearerToken.substring(7);
-
-        // 💡 AuthService.logout을 호출하지만, 이제 이 메서드는 아무 작업도 하지 않습니다.
-        authService.logout(accessToken);
-
-        // 클라이언트는 200 OK를 받고, 토큰을 로컬에서 삭제하게 됩니다.
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String bearerToken) {
+        return ResponseEntity.ok(
+                new ApiResponse<>(200, "로그아웃 완료 (JWT는 클라이언트에서 삭제)", null)
+        );
     }
 }
