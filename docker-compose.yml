@@ -1,41 +1,22 @@
-version: "3.9"
-
 services:
   app:
     image: ${DOCKER_USERNAME}/${DOCKER_REPO}:${IMAGE_TAG:-latest}
-    container_name: routie-be
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
-      # 프로필
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - SPRING_CONFIG_ADDITIONAL_LOCATION=./ROUTIE_BE_config/
-
-      # DB 접속 (application.yml에서 ${...}로 읽히도록 맞춤)
-      - SPRING_DATASOURCE_URL=jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useUnicode=true&characterEncoding=utf8&connectionCollation=utf8mb4_unicode_ci&serverTimezone=Asia/Seoul&allowPublicKeyRetrieval=true&useSSL=false
+      - SPRING_DATASOURCE_URL=jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-
-      # JPA
-      - SPRING_JPA_HIBERNATE_DDL_AUTO=${SPRING_JPA_HIBERNATE_DDL_AUTO:-update}
-      - SPRING_JPA_SHOW_SQL=${SPRING_JPA_SHOW_SQL:-true}
-
-      # 필요 시 기타 환경변수 추가
-      # - JWT_SECRET=${JWT_SECRET}
-      # - JWT_EXPIRATION=${JWT_EXPIRATION}
     depends_on:
       mysql:
         condition: service_healthy
     networks:
       - routie-net
     restart: unless-stopped
-    # Dockerfile에 ENTRYPOINT ["java","-jar","/app/app.jar"]가 있다면 command 불필요
 
   mysql:
     image: mysql:8.0
-    container_name: routie-mysql
-    ports:
-      - "3306:3306"        # 외부에서 접속 안 할 거면 지워도 됨
     environment:
       - MYSQL_DATABASE=${DB_NAME}
       - MYSQL_USER=${DB_USERNAME}
@@ -44,10 +25,25 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${DB_USERNAME}", "-p${DB_PASSWORD}"]
-      interval: 10s
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
+    networks:
+      - routie-net
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /home/ubuntu/nginx/conf.d:/etc/nginx/conf.d
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      app:
+        condition: service_started
     networks:
       - routie-net
     restart: unless-stopped

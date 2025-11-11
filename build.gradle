@@ -28,6 +28,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.6.0'
     implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
@@ -43,4 +46,23 @@ dependencies {
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+spotless {
+    java {
+        target 'src/**/*.java'
+        // 구글 포맷(AOSP) 예시 — 원하면 eclipse(), prettier() 등으로 변경 가능
+        googleJavaFormat('1.17.0').aosp()
+        importOrder 'java', 'javax', 'org', 'com', ''  // 필요시 조정
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+    // Gradle 스크립트까지 체크하려면:
+    format('gradle') {
+        target '*.gradle', 'gradle/**/*.gradle'
+        indentWithSpaces(2)
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
 }
