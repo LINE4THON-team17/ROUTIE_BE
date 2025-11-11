@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/search") // 검색 엔드포인트 그룹
+@RequestMapping("/api/place/search") // 검색 엔드포인트 그룹
 public class PlaceSearchController {
 
     private final KakaoMapService kakaoMapService;

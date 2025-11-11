@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class MapConfigController {
 
     // 💡 .env 파일에서 지도 API 키와 기본값을 읽어옵니다.
-    @Value("${MAP_API_KEY_KAKAO:TEST_KEY}")
+    @Value("${KAKAO_MAP_JS_KEY:TEST_KEY}")
     private String mapApiKey;
 
     @GetMapping("/map")
