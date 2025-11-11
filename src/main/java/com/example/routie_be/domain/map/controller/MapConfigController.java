@@ -23,16 +23,13 @@ public class MapConfigController {
     @Value("${KAKAO_MAP_JS_KEY:TEST_KEY}")
     private String mapApiKey;
 
-    @Operation(
-            summary = "지도 설정 정보 조회",
-            description = "카카오 지도 JS 키 및 기본 위도/경도 정보를 반환합니다."
-    )
+    @Operation(summary = "지도 설정 정보 조회", description = "카카오 지도 JS 키 및 기본 위도/경도 정보를 반환합니다.")
     @GetMapping("/map")
     public ResponseEntity<ApiResponse<MapConfigDto>> getMapConfig() {
         MapConfigDto config =
                 MapConfigDto.builder()
                         .mapApiKey(mapApiKey)
-                        .defaultLat(37.5665)   // 기본 중심 좌표 (서울시청)
+                        .defaultLat(37.5665) // 기본 중심 좌표 (서울시청)
                         .defaultLng(126.9780)
                         .build();
 

@@ -1,11 +1,12 @@
 package com.example.routie_be.domain.route.dto;
 
-import com.example.routie_be.domain.route.entity.Route;
-import lombok.Builder;
-import lombok.Getter;
-
 import java.util.List;
 import java.util.stream.Collectors;
+
+import com.example.routie_be.domain.route.entity.Route;
+
+import lombok.Builder;
+import lombok.Getter;
 
 @Getter
 @Builder

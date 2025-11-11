@@ -1,12 +1,13 @@
 package com.example.routie_be.domain.route.repository;
 
-import com.example.routie_be.domain.route.entity.Route;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.List;
-import java.util.Optional;
+import com.example.routie_be.domain.route.entity.Route;
 
 public interface RouteRepository extends JpaRepository<Route, Long> {
 
