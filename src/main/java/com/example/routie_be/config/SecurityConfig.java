@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,12 +29,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                // 🔒 CSRF 비활성화
-                .csrf(csrf -> csrf.disable())
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web ->
+                web.ignoring()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/actuator/**",
+                                "/error");
+    }
 
-                // 🌐 CORS 설정
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
                 .cors(
                         cors ->
                                 cors.configurationSource(
@@ -43,49 +52,23 @@ public class SecurityConfig {
                                             config.setAllowedMethods(
                                                     List.of(
                                                             "GET", "POST", "PUT", "DELETE",
-                                                            "OPTIONS"));
+                                                            "OPTIONS", "PATCH"));
                                             config.setAllowedHeaders(List.of("*"));
                                             config.setAllowCredentials(true);
                                             return config;
                                         }))
-
-                // 🧩 세션 사용 안 함 (JWT 방식)
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // 🔐 요청별 접근 권한 설정
                 .authorizeHttpRequests(
                         auth ->
                                 auth.requestMatchers(HttpMethod.OPTIONS, "/**")
                                         .permitAll()
-
-                                        // ✅ Swagger & Actuator 허용
-                                        .requestMatchers(
-                                                "/swagger-ui/**",
-                                                "/v3/api-docs/**",
-                                                "/actuator/**",
-                                                "/swagger-ui.html",
-                                                "/swagger-resources/**",
-                                                "/webjars/**")
-                                        .permitAll()
-
-                                        // ✅ 인증 없이 접근 가능한 경로
                                         .requestMatchers("/api/auth/signup", "/api/auth/login")
                                         .permitAll()
-
-                                        // ✅ 인증 필요한 요청
-                                        .requestMatchers(HttpMethod.POST, "/routes")
-                                        .authenticated()
-
-                                        // ❌ 나머지는 기본적으로 인증 필요
                                         .anyRequest()
                                         .authenticated())
-
-                // 🧱 formLogin / httpBasic 비활성화
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
-
-                // 🧩 JWT 필터 추가
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtTokenProvider),
                         UsernamePasswordAuthenticationFilter.class);
@@ -93,7 +76,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 🔑 비밀번호 암호화 빈 등록
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
