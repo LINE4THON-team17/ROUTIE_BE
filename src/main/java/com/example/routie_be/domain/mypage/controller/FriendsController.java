@@ -163,4 +163,3 @@ public class FriendsController {
         return ResponseEntity.ok(friendsService.status(current.getUserId(), userId));
     }
 }
-
