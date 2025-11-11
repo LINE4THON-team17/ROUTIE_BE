@@ -1,5 +1,6 @@
 package com.example.routie_be.security;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,18 +21,19 @@ import lombok.RequiredArgsConstructor;
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
-    // application.properties 또는 application.yml에서 주입받을 JWT 비밀 키
-    @Value("${jwt.secret-key}")
+
+    @Value("${jwt.secret-key:${JWT_SECRET_KEY}}")
     private String secretKeyString;
 
-    @Value("${jwt.access-token-expiration-milliseconds}")
+    @Value(
+            "${jwt.access-token-expiration-milliseconds:${JWT_ACCESS_TOKEN_EXPIRATION_MILLISECONDS:3600000}}")
     private long accessTokenExpirationMs;
 
     private Key secretKey;
 
     @PostConstruct
     protected void init() {
-        this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes());
+        this.secretKey = Keys.hmacShaKeyFor(secretKeyString.getBytes(StandardCharsets.UTF_8));
     }
 
     public String createAccessToken(Long userId, String email) {
@@ -69,17 +71,14 @@ public class JwtTokenProvider {
         }
     }
 
-    /** 토큰을 복호화하여 인증 객체(Authentication)를 생성합니다. Principal에 Long 타입의 userId를 설정합니다. */
     public Authentication getAuthentication(String token) {
         Claims claims =
                 Jwts.parser().setSigningKey(secretKey).build().parseClaimsJws(token).getBody();
 
-        // 1. Long 타입의 userId 클레임을 추출 (Controller의 @AuthenticationPrincipal Long userId에 주입될 값)
+        // 1. Long 타입의 userId 클레임 추출
         Long userId = claims.get("userId", Long.class);
 
         if (userId == null) {
-            // userId 클레임이 누락된 경우, 인증은 실패로 처리하는 것이 안전합니다.
-            // Spring Security 필터 체인에서 이 예외를 처리하도록 할 수 있습니다.
             throw new JwtException("User ID claim (userId) is missing or invalid in token.");
         }
 
@@ -88,10 +87,7 @@ public class JwtTokenProvider {
                 Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"));
 
         // 3. Long 타입의 userId를 Principal로 설정하여 Authentication 객체 반환
-        return new UsernamePasswordAuthenticationToken(
-                userId, // 💡 Long userId가 Principal로 설정됨
-                "",
-                authorities);
+        return new UsernamePasswordAuthenticationToken(userId, "", authorities);
     }
 
     public long getExpiration(String token) {
