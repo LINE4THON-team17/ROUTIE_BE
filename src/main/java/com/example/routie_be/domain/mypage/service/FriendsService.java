@@ -32,7 +32,8 @@ public class FriendsService {
         List<Long> ids = follows.stream().map(UserFollow::getFolloweeId).distinct().toList();
 
         Map<Long, MypageUser> userMap =
-                userRepo.findByIdIn(ids).stream().collect(Collectors.toMap(MypageUser::getId, u -> u));
+                userRepo.findByIdIn(ids).stream()
+                        .collect(Collectors.toMap(MypageUser::getId, u -> u));
 
         return follows.stream()
                 .map(UserFollow::getFolloweeId)
