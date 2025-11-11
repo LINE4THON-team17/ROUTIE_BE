@@ -22,17 +22,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(
-        HttpServletRequest request,
-        HttpServletResponse response,
-        FilterChain filterChain
-    ) throws ServletException, IOException {
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
         String path = request.getRequestURI();
 
         if (path.startsWith("/swagger")
-            || path.startsWith("/v3/api-docs")
-            || path.startsWith("/actuator")
-            || path.startsWith("/error")) {
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/actuator")
+                || path.startsWith("/error")) {
             filterChain.doFilter(request, response);
             return;
         }

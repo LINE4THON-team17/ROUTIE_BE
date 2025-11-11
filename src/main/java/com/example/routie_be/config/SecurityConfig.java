@@ -22,56 +22,62 @@ import com.example.routie_be.security.JwtTokenProvider;
 @EnableWebSecurity
 public class SecurityConfig {
 
-  private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider jwtTokenProvider;
 
-  public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
-    this.jwtTokenProvider = jwtTokenProvider;
-  }
+    public SecurityConfig(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
+    }
 
-  @Bean
-  public WebSecurityCustomizer webSecurityCustomizer() {
-    return web -> web.ignoring().requestMatchers(
-        "/v3/api-docs/**",
-        "/swagger-ui/**",
-        "/swagger-ui.html",
-        "/actuator/**",
-        "/error"
-    );
-  }
+    @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return web ->
+                web.ignoring()
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/actuator/**",
+                                "/error");
+    }
 
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .csrf(csrf -> csrf.disable())
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable())
+                .cors(
+                        cors ->
+                                cors.configurationSource(
+                                        request -> {
+                                            CorsConfiguration config = new CorsConfiguration();
+                                            config.setAllowedOriginPatterns(List.of("*"));
+                                            config.setAllowedMethods(
+                                                    List.of(
+                                                            "GET", "POST", "PUT", "DELETE",
+                                                            "OPTIONS", "PATCH"));
+                                            config.setAllowedHeaders(List.of("*"));
+                                            config.setAllowCredentials(true);
+                                            return config;
+                                        }))
+                .sessionManagement(
+                        session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(
+                        auth ->
+                                auth.requestMatchers(HttpMethod.OPTIONS, "/**")
+                                        .permitAll()
+                                        .requestMatchers("/api/auth/signup", "/api/auth/login")
+                                        .permitAll()
+                                        .anyRequest()
+                                        .authenticated())
+                .formLogin(form -> form.disable())
+                .httpBasic(basic -> basic.disable())
+                .addFilterBefore(
+                        new JwtAuthenticationFilter(jwtTokenProvider),
+                        UsernamePasswordAuthenticationFilter.class);
 
-        .cors(cors -> cors.configurationSource(request -> {
-          CorsConfiguration config = new CorsConfiguration();
-          config.setAllowedOriginPatterns(List.of("*"));
-          config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-          config.setAllowedHeaders(List.of("*"));
-          config.setAllowCredentials(true);
-          return config;
-        }))
+        return http.build();
+    }
 
-        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            .requestMatchers("/api/auth/signup", "/api/auth/login").permitAll()
-            .anyRequest().authenticated()
-        )
-
-        .formLogin(form -> form.disable())
-        .httpBasic(basic -> basic.disable())
-
-        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-            UsernamePasswordAuthenticationFilter.class);
-
-    return http.build();
-  }
-
-  @Bean
-  public PasswordEncoder passwordEncoder() {
-    return new BCryptPasswordEncoder();
-  }
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

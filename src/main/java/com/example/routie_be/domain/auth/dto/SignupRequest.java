@@ -9,12 +9,13 @@ import lombok.Setter;
 @Setter
 @Getter
 public class SignupRequest {
-    @Email @NotBlank
-    private String email;
+    @Email @NotBlank private String email;
 
-    @NotBlank @Size(min = 8, max = 64)
+    @NotBlank
+    @Size(min = 8, max = 64)
     private String password;
 
-    @NotBlank @Size(min = 2, max = 20)
+    @NotBlank
+    @Size(min = 2, max = 20)
     private String nickname;
 }
