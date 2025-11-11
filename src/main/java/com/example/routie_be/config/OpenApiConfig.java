@@ -10,8 +10,9 @@ import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
 public class OpenApiConfig {
+
     @Bean
-    public OpenAPI customOpenAPI() {
-        return new OpenAPI().servers(List.of(new Server().url("/")));
+    public OpenAPI openAPI() {
+        return new OpenAPI().servers(List.of(new Server().url("/").description("Current origin")));
     }
 }
