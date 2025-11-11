@@ -57,7 +57,6 @@ public class UsersService {
             u.setProfileImageUrl(dto.profileImageUrl());
         }
 
-        // 응답은 기존 스펙 유지
         long routesCount = 0L;
         long savedCount = savedRouteRepo.countByUserId(userId);
         long friendsCount = followRepo.countByFolloweeId(userId);
