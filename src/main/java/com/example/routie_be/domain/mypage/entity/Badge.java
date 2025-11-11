@@ -14,7 +14,11 @@ public class Badge {
     private String name;
 
     private String description;
+
+    @Column(nullable = false)
     private Integer minRoutes;
+
+    @Column(nullable = false)
     private Integer maxRoutes;
 
     protected Badge() {}

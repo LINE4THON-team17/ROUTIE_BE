@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(
         name = "user_profile_share",
-        indexes = {@Index(name = "idx_slug", columnList = "slug", unique = true)})
+        indexes = @Index(name = "idx_slug", columnList = "slug", unique = true))
 public class UserProfileShare {
 
     @Id
@@ -25,16 +25,16 @@ public class UserProfileShare {
 
     private LocalDateTime lastAccessedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     protected UserProfileShare() {}
 
     public UserProfileShare(Long userId, String slug) {
         this.userId = userId;
         this.slug = slug;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {

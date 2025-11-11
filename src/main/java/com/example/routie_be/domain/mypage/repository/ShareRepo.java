@@ -11,5 +11,5 @@ public interface ShareRepo extends JpaRepository<UserProfileShare, Long> {
 
     Optional<UserProfileShare> findByUserId(Long userId);
 
-    boolean existsByUserId(Long userId);
+    boolean existsBySlug(String slug);
 }

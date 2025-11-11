@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(
         name = "user_saved_route",
-        indexes = {@Index(name = "idx_usr_user_created", columnList = "userId,createdAt")})
+        indexes = @Index(name = "idx_usr_user_created", columnList = "userId,createdAt"))
 public class UserSavedRoute {
 
     @Id
@@ -23,16 +23,16 @@ public class UserSavedRoute {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     protected UserSavedRoute() {}
 
     public UserSavedRoute(Long userId, Long routeId) {
         this.userId = userId;
         this.routeId = routeId;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
     }
 
     public Long getId() {

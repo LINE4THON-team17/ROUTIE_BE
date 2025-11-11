@@ -7,11 +7,10 @@ import jakarta.persistence.*;
 @Entity
 @Table(
         name = "user_badge",
-        uniqueConstraints = {
-            @UniqueConstraint(
-                    name = "uk_user_badge",
-                    columnNames = {"userId", "badgeId"})
-        })
+        uniqueConstraints =
+                @UniqueConstraint(
+                        name = "uk_user_badge",
+                        columnNames = {"userId", "badgeId"}))
 public class UserBadge {
 
     @Id
@@ -27,16 +26,16 @@ public class UserBadge {
     @Column(nullable = false, updatable = false)
     private LocalDateTime grantedAt;
 
+    @PrePersist
+    protected void onCreate() {
+        this.grantedAt = LocalDateTime.now();
+    }
+
     protected UserBadge() {}
 
     public UserBadge(Long userId, Long badgeId) {
         this.userId = userId;
         this.badgeId = badgeId;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.grantedAt = LocalDateTime.now();
     }
 
     public Long getId() {
