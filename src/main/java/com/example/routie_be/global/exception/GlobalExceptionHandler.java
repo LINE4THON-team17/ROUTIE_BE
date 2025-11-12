@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.example.routie_be.global.common.ApiResponse;
@@ -120,6 +123,27 @@ public class GlobalExceptionHandler {
         return resp(400, message, data);
     }
 
+    /** 💡 FriendsService 등에서 던진 ResponseStatusException 그대로 전달 */
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<Object>> handleResponseStatus(ResponseStatusException e) {
+        String message = e.getReason() != null ? e.getReason() : e.getStatusCode().toString();
+        Object data = exposeDetails ? Map.of("exception", e.getClass().getSimpleName()) : null;
+
+        log.debug("[{}] ResponseStatusException: {}", e.getStatusCode().value(), message, e);
+        return resp(e.getStatusCode().value(), message, data);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleDataIntegrity(
+            DataIntegrityViolationException e) {
+        String message = "이미 팔로우 중입니다.";
+        Object data =
+                exposeDetails ? Map.of("reason", e.getMostSpecificCause().getMessage()) : null;
+
+        log.debug("[400] DataIntegrityViolationException", e);
+        return resp(HttpStatus.BAD_REQUEST.value(), message, data);
+    }
+
     /** 401 - 인증 실패 */
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ApiResponse<Object>> handleAuthentication(AuthenticationException e) {
@@ -140,7 +164,7 @@ public class GlobalExceptionHandler {
         return resp(403, message, data);
     }
 
-    /** 404 - 매핑 없음 (아래 설정 필요) */
+    /** 404 - 매핑 없음 */
     @ExceptionHandler(NoHandlerFoundException.class)
     public ResponseEntity<ApiResponse<Object>> handleNoHandler(NoHandlerFoundException e) {
         String message = "요청한 리소스를 찾을 수 없습니다.";
