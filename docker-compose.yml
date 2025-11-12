@@ -8,6 +8,15 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+
+      - SPRINGDOC_SERVER_URL=/
+
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ACCESS_TOKEN_EXPIRATION_MILLISECONDS=${JWT_ACCESS_TOKEN_EXPIRATION_MILLISECONDS}
+
+      - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
+      - KAKAO_MAP_JS_KEY=${KAKAO_MAP_JS_KEY}
+
     depends_on:
       mysql:
         condition: service_healthy
