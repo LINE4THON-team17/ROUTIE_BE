@@ -60,14 +60,12 @@ public class FriendsController {
                         {
                           "id": 12,
                           "nickname": "루루",
-                          "profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png",
-                          "friendDays": 25
+                          "profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/rourou.png"
                         },
                         {
                           "id": 34,
                           "nickname": "티티",
-                          "profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/routie.png",
-                          "friendDays": 3
+                          "profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/tietie.png"
                         }
                       ]
                       """)))

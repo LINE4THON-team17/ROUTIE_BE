@@ -5,8 +5,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.routie_be.domain.mypage.dto.FollowStatusDto;
 import com.example.routie_be.domain.mypage.dto.FriendDto;
@@ -56,7 +58,14 @@ public class FriendsService {
 
     @Transactional
     public void unfollow(Long myId, Long targetId) {
-        followRepo.findByFollowerIdAndFolloweeId(myId, targetId).ifPresent(followRepo::delete);
+        var rel =
+                followRepo
+                        .findByFollowerIdAndFolloweeId(myId, targetId)
+                        .orElseThrow(
+                                () ->
+                                        new ResponseStatusException(
+                                                HttpStatus.BAD_REQUEST, "팔로우 중이 아닙니다."));
+        followRepo.delete(rel);
     }
 
     public FollowStatusDto status(Long myId, Long targetId) {
