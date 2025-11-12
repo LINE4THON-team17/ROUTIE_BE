@@ -20,7 +20,7 @@ public class UserProfileShare extends BaseTimeEntity {
     private Long userId;
 
     @Column(nullable = false, unique = true)
-    private String slug; // ex: routie-abc123
+    private String slug;
 
     @Column private LocalDateTime lastAccessedAt;
 
