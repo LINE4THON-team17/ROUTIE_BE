@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @Tag(name = "MapConfig", description = "카카오 지도 설정 관련 API")
 public class MapConfigController {
 
-    @Value("${KAKAO_MAP_JS_KEY:TEST_KEY}")
+    @Value("${kakao.map-js-key:${KAKAO_MAP_JS_KEY}}")
     private String mapApiKey;
 
     @Operation(summary = "지도 설정 정보 조회", description = "카카오 지도 JS 키 및 기본 위도/경도 정보를 반환합니다.")

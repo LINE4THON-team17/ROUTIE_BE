@@ -1,10 +1,9 @@
 package com.example.routie_be.domain.map.service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.example.routie_be.domain.route.dto.PlaceSelectionDto;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,16 +12,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import com.example.routie_be.domain.route.dto.PlaceSelectionDto;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import lombok.RequiredArgsConstructor;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class KakaoMapService {
-    @Value("${KAKAO_REST_API_KEY:default_rest_key}")
+    @Value("${kakao.rest-api-key:${KAKAO_REST_API_KEY}}")
     private String kakaoRestApiKey;
 
     private final String KAKAO_API_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
