@@ -17,6 +17,10 @@ services:
       - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
       - KAKAO_MAP_JS_KEY=${KAKAO_MAP_JS_KEY}
 
+      - SHARE_BASE_URL=${SHARE_BASE_URL}
+      - SHARE_PATH_TEMPLATE=${SHARE_PATH_TEMPLATE}
+      - SHARE_SLUG_LENGTH=${SHARE_SLUG_LENGTH}
+
     depends_on:
       mysql:
         condition: service_healthy
