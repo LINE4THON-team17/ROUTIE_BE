@@ -46,6 +46,7 @@ src/main/resources/application.properties
 # 필요 시 프로필별 설정도 제외 (권장)
 src/main/resources/application-*.yml
 src/main/resources/application-*.properties
+src/main/resources/application-local.properties
 
 # 로그
 *.log

@@ -2,13 +2,15 @@ package com.example.routie_be.domain.mypage.entity;
 
 import java.time.LocalDateTime;
 
+import com.example.routie_be.global.entity.BaseTimeEntity;
+
 import jakarta.persistence.*;
 
 @Entity
 @Table(
         name = "user_profile_share",
         indexes = @Index(name = "idx_slug", columnList = "slug", unique = true))
-public class UserProfileShare {
+public class UserProfileShare extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,15 +22,7 @@ public class UserProfileShare {
     @Column(nullable = false, unique = true)
     private String slug; // ex: routie-abc123
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    private LocalDateTime lastAccessedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
+    @Column private LocalDateTime lastAccessedAt;
 
     protected UserProfileShare() {}
 
@@ -47,10 +41,6 @@ public class UserProfileShare {
 
     public String getSlug() {
         return slug;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 
     public LocalDateTime getLastAccessedAt() {

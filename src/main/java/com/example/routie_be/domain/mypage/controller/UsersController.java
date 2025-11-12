@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @Tag(name = "User API (MyPage)", description = """
@@ -54,7 +55,7 @@ public class UsersController {
                         "id": 7,
                         "nickname": "루티",
                         "email": "routie@example.com",
-                        "profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/routie.png",
+                        "profileImageUrl": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/routie.png",
                         "friendDays": 42,
                         "badgeCount": 3
                       }
@@ -90,7 +91,7 @@ public class UsersController {
                                                                     """
                   {
                     "nickname": "루루",
-                    "profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png"
+                    "profileImageUrl": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png"
                   }
                   """))),
             responses = {
@@ -107,9 +108,9 @@ public class UsersController {
                                                                 """
                       {
                         "id": 7,
-                        "nickname": "피클이",
+                        "nickname": "티티",
                         "email": "routie@example.com",
-                        "profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png",
+                        "profileImageUrl": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png",
                         "friendDays": 42,
                         "badgeCount": 3
                       }
@@ -117,7 +118,7 @@ public class UsersController {
                 @ApiResponse(responseCode = "400", description = "유효하지 않은 입력값 (예: 닉네임 중복)")
             })
     @PatchMapping("/me")
-    public ResponseEntity<UserMeResponse> updateProfile(@RequestBody UserUpdateRequest dto) {
+    public ResponseEntity<UserMeResponse> updateProfile(@Valid @RequestBody UserUpdateRequest dto) {
         return ResponseEntity.ok(usersService.updateProfile(current.getUserId(), dto));
     }
 
