@@ -1,6 +1,6 @@
 package com.example.routie_be.domain.mypage.entity;
 
-import java.time.LocalDateTime;
+import com.example.routie_be.global.entity.BaseTimeEntity;
 
 import jakarta.persistence.*;
 
@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 @Table(
         name = "user_saved_route",
         indexes = @Index(name = "idx_usr_user_created", columnList = "userId,createdAt"))
-public class UserSavedRoute {
+public class UserSavedRoute extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,14 +19,6 @@ public class UserSavedRoute {
 
     @Column(nullable = false)
     private Long routeId;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
 
     protected UserSavedRoute() {}
 
@@ -45,9 +37,5 @@ public class UserSavedRoute {
 
     public Long getRouteId() {
         return routeId;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 }

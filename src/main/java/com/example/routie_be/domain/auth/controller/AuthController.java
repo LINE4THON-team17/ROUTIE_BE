@@ -1,6 +1,7 @@
 package com.example.routie_be.domain.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.routie_be.domain.auth.dto.LoginRequest;
@@ -27,7 +28,20 @@ public class AuthController {
 
     @Operation(summary = "회원가입", description = "이메일, 비밀번호, 닉네임을 입력받아 회원을 등록합니다.")
     @PostMapping("/signup")
-    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request, BindingResult br) {
+        // BindingResult 검증/로깅 (요청하신 형태 그대로)
+        if (br.hasErrors()) {
+            br.getFieldErrors()
+                    .forEach(
+                            fe ->
+                                    System.out.printf(
+                                            "❌ field='%s', rejected='%s', message='%s'%n",
+                                            fe.getField(),
+                                            fe.getRejectedValue(),
+                                            fe.getDefaultMessage()));
+            return ResponseEntity.badRequest().body("VALIDATION ERROR CHECK CONSOLE");
+        }
+
         try {
             SignupResponse response = authService.signup(request);
             return ResponseEntity.status(201).body(new ApiResponse<>(201, "회원가입 성공", response));

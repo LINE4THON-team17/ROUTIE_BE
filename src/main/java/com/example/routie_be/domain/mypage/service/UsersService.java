@@ -7,6 +7,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.routie_be.domain.auth.entity.User;
+import com.example.routie_be.domain.auth.repository.UserRepository;
 import com.example.routie_be.domain.mypage.dto.*;
 import com.example.routie_be.domain.mypage.entity.MypageUser;
 import com.example.routie_be.domain.mypage.entity.UserSavedRoute;
@@ -24,6 +26,7 @@ public class UsersService {
     private final UserRepo userRepo;
     private final SavedRouteRepo savedRouteRepo;
     private final FollowRepo followRepo;
+    private final UserRepository userRepository;
 
     public UserMeResponse getProfile(Long userId) {
         MypageUser u =
@@ -31,13 +34,12 @@ public class UsersService {
                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
         long routesCount = 0L; // TODO: Route 테이블 연동 후 수정
-        // Saved 개수는 레포 카운트 메서드 사용(권장). 없다면 Page#getTotalElements로 대체.
         long savedCount = savedRouteRepo.countByUserId(userId);
         long friendsCount = followRepo.countByFolloweeId(userId);
 
         return new UserMeResponse(
                 u.getId(),
-                u.getName(),
+                u.getNickname(),
                 u.getProfileImageUrl(),
                 routesCount,
                 savedCount,
@@ -46,25 +48,28 @@ public class UsersService {
 
     @Transactional
     public UserMeResponse updateProfile(Long userId, UserUpdateRequest dto) {
-        MypageUser u =
-                userRepo.findById(userId)
+        User user =
+                userRepository
+                        .findById(userId)
                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
 
-        if (dto.name() != null && !dto.name().isBlank()) {
-            u.setName(dto.name());
+        if (dto.nickname() != null
+                && !dto.nickname().isBlank()
+                && !dto.nickname().equals(user.getNickname())
+                && userRepository.existsByNickname(dto.nickname())) {
+            throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
         }
-        if (dto.profileImageUrl() != null && !dto.profileImageUrl().isBlank()) {
-            u.setProfileImageUrl(dto.profileImageUrl());
-        }
+
+        user.updateProfile(dto.nickname(), dto.profileImageUrl());
 
         long routesCount = 0L;
         long savedCount = savedRouteRepo.countByUserId(userId);
         long friendsCount = followRepo.countByFolloweeId(userId);
 
         return new UserMeResponse(
-                u.getId(),
-                u.getName(),
-                u.getProfileImageUrl(),
+                user.getId(),
+                user.getNickname(),
+                user.getProfileImageUrl(),
                 routesCount,
                 savedCount,
                 friendsCount);
