@@ -1,9 +1,12 @@
 package com.example.routie_be.security;
 
 import java.io.IOException;
+import java.util.List;
 
-import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -26,7 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
-
         if (path.startsWith("/swagger")
                 || path.startsWith("/v3/api-docs")
                 || path.startsWith("/actuator")
@@ -37,8 +39,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
+        if (StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
+            Long userId = jwtTokenProvider.getUserId(token);
+            String email = jwtTokenProvider.getEmail(token);
+
+            var authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+
+            var principal = new UserPrincipal(userId, email, authorities);
+
+            var authentication =
+                    new UsernamePasswordAuthenticationToken(principal, null, authorities);
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
