@@ -27,6 +27,12 @@ public class FriendsService {
     private final FollowRepo followRepo;
     private final UserRepo userRepo;
 
+    private void assertTargetExists(Long targetId) {
+        if (!userRepo.existsById(targetId)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "해당 userId가 존재하지 않습니다.");
+        }
+    }
+
     public List<FriendDto> list(Long myId) {
         List<UserFollow> follows = followRepo.findByFollowerIdOrderByCreatedAtDesc(myId);
         if (follows.isEmpty()) return List.of();
@@ -47,17 +53,21 @@ public class FriendsService {
 
     @Transactional
     public void follow(Long myId, Long targetId) {
+        assertTargetExists(targetId);
+
         if (Objects.equals(myId, targetId)) {
-            throw new IllegalArgumentException("자기 자신은 팔로우할 수 없습니다.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "자기 자신은 팔로우할 수 없습니다.");
         }
         if (followRepo.existsByFollowerIdAndFolloweeId(myId, targetId)) {
-            return;
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이미 팔로우 중입니다.");
         }
         followRepo.save(new UserFollow(myId, targetId));
     }
 
     @Transactional
     public void unfollow(Long myId, Long targetId) {
+        assertTargetExists(targetId);
+
         var rel =
                 followRepo
                         .findByFollowerIdAndFolloweeId(myId, targetId)
@@ -69,6 +79,8 @@ public class FriendsService {
     }
 
     public FollowStatusDto status(Long myId, Long targetId) {
+        assertTargetExists(targetId);
+
         boolean iFollow = followRepo.existsByFollowerIdAndFolloweeId(myId, targetId);
         boolean followMe = followRepo.existsByFollowerIdAndFolloweeId(targetId, myId);
         return new FollowStatusDto(iFollow, followMe);

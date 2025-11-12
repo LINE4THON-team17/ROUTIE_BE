@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(name = "mypage_user_view")
-@Immutable // 읽기 전용
+@Immutable
 public class MypageUser {
 
     @Id private Long id;
