@@ -20,6 +20,11 @@ services:
       - APP_SHARE_BASE_URL=https://routie.shop
       - APP_SHARE_PATH_TEMPLATE=/share/users/%s
       - APP_SHARE_SLUG_LENGTH=10
+
+      - CLOUD_AWS_S3_BUCKET=routie-4linethon
+      - CLOUD_AWS_REGION_STATIC=ap-northeast-2
+      - CLOUD_AWS_CREDENTIALS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - CLOUD_AWS_CREDENTIALS_SECRET_KEY=${AWS_SECRET_KEY}
     depends_on:
       mysql:
         condition: service_healthy
