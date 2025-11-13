@@ -40,9 +40,9 @@ public class GlobalExceptionHandler {
         HttpStatusCode statusCode = e.getStatusCode();
         int status = statusCode.value();
         String message =
-            (e.getReason() != null && !e.getReason().isBlank())
-                ? e.getReason()
-                : "요청 처리 중 오류가 발생했습니다.";
+                (e.getReason() != null && !e.getReason().isBlank())
+                        ? e.getReason()
+                        : "요청 처리 중 오류가 발생했습니다.";
         Object data = exposeDetails ? Map.of("reason", e.getReason()) : null;
 
         log.debug("[{}] ResponseStatusException: {}", status, e.getReason(), e);
@@ -52,15 +52,15 @@ public class GlobalExceptionHandler {
     /** 400 - @Valid 바디 검증 실패 */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Object>> handleMethodArgumentNotValid(
-        MethodArgumentNotValidException e) {
+            MethodArgumentNotValidException e) {
         Map<String, List<String>> errors =
-            e.getBindingResult().getFieldErrors().stream()
-                .collect(
-                    Collectors.groupingBy(
-                        fe -> fe.getField(),
-                        Collectors.mapping(
-                            fe -> fe.getDefaultMessage(),
-                            Collectors.toList())));
+                e.getBindingResult().getFieldErrors().stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        fe -> fe.getField(),
+                                        Collectors.mapping(
+                                                fe -> fe.getDefaultMessage(),
+                                                Collectors.toList())));
 
         String message = "요청 형식이 올바르지 않습니다.";
         Object data = exposeDetails ? Map.of("errors", errors) : null;
@@ -73,13 +73,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BindException.class)
     public ResponseEntity<ApiResponse<Object>> handleBindException(BindException e) {
         Map<String, List<String>> errors =
-            e.getBindingResult().getFieldErrors().stream()
-                .collect(
-                    Collectors.groupingBy(
-                        fe -> fe.getField(),
-                        Collectors.mapping(
-                            fe -> fe.getDefaultMessage(),
-                            Collectors.toList())));
+                e.getBindingResult().getFieldErrors().stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        fe -> fe.getField(),
+                                        Collectors.mapping(
+                                                fe -> fe.getDefaultMessage(),
+                                                Collectors.toList())));
         String message = "요청 형식이 올바르지 않습니다.";
         Object data = exposeDetails ? Map.of("errors", errors) : null;
 
@@ -90,10 +90,10 @@ public class GlobalExceptionHandler {
     /** 400 - JSON 파싱 실패, 잘못된 본문 */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiResponse<Object>> handleNotReadable(
-        HttpMessageNotReadableException e) {
+            HttpMessageNotReadableException e) {
         String message = "요청 본문을 읽을 수 없습니다.";
         Object data =
-            exposeDetails ? Map.of("reason", e.getMostSpecificCause().getMessage()) : null;
+                exposeDetails ? Map.of("reason", e.getMostSpecificCause().getMessage()) : null;
 
         log.debug("[400] HttpMessageNotReadableException", e);
         return resp(400, message, data);
@@ -102,7 +102,7 @@ public class GlobalExceptionHandler {
     /** 400 - 요청 파라미터 누락 */
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse<Object>> handleMissingParam(
-        MissingServletRequestParameterException e) {
+            MissingServletRequestParameterException e) {
         String message = "필수 요청 파라미터가 누락되었습니다.";
         Object data = exposeDetails ? Map.of("parameter", e.getParameterName()) : null;
 
@@ -114,9 +114,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Object>> handleConstraint(ConstraintViolationException e) {
         List<String> violations =
-            e.getConstraintViolations().stream()
-                .map(v -> v.getPropertyPath() + ": " + v.getMessage())
-                .collect(Collectors.toList());
+                e.getConstraintViolations().stream()
+                        .map(v -> v.getPropertyPath() + ": " + v.getMessage())
+                        .collect(Collectors.toList());
 
         String message = "유효성 검증에 실패했습니다.";
         Object data = exposeDetails ? Map.of("violations", violations) : null;
@@ -160,9 +160,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleNoHandler(NoHandlerFoundException e) {
         String message = "요청한 리소스를 찾을 수 없습니다.";
         Object data =
-            exposeDetails
-                ? Map.of("path", e.getRequestURL(), "method", e.getHttpMethod())
-                : null;
+                exposeDetails
+                        ? Map.of("path", e.getRequestURL(), "method", e.getHttpMethod())
+                        : null;
 
         log.debug("[404] NoHandlerFoundException: {} {}", e.getHttpMethod(), e.getRequestURL(), e);
         return resp(404, message, data);
@@ -171,12 +171,12 @@ public class GlobalExceptionHandler {
     /** 405 - HTTP 메서드 미지원 */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     public ResponseEntity<ApiResponse<Object>> handleMethodNotSupported(
-        HttpRequestMethodNotSupportedException e) {
+            HttpRequestMethodNotSupportedException e) {
         String message = "지원하지 않는 HTTP 메서드입니다.";
         Object data =
-            exposeDetails
-                ? Map.of("method", e.getMethod(), "supported", e.getSupportedHttpMethods())
-                : null;
+                exposeDetails
+                        ? Map.of("method", e.getMethod(), "supported", e.getSupportedHttpMethods())
+                        : null;
 
         log.debug("[405] HttpRequestMethodNotSupportedException: {}", e.getMethod(), e);
         return resp(405, message, data);
