@@ -17,6 +17,9 @@ services:
       - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
       - KAKAO_MAP_JS_KEY=${KAKAO_MAP_JS_KEY}
 
+      - APP_SHARE_BASE_URL=https://routie.shop
+      - APP_SHARE_PATH_TEMPLATE=/share/users/%s
+      - APP_SHARE_SLUG_LENGTH=10
     depends_on:
       mysql:
         condition: service_healthy
