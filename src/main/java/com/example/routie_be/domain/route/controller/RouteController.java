@@ -1,24 +1,23 @@
 package com.example.routie_be.domain.route.controller;
 
-import java.util.List;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import com.example.routie_be.domain.route.dto.RouteCreateRequest;
 import com.example.routie_be.domain.route.dto.RouteData;
 import com.example.routie_be.domain.route.dto.RouteDetailDto;
 import com.example.routie_be.domain.route.dto.RouteSummaryDto;
 import com.example.routie_be.domain.route.service.RouteService;
+import com.example.routie_be.domain.route.service.S3Uploader;
 import com.example.routie_be.global.common.ApiResponse;
 import com.example.routie_be.global.common.CurrentUserService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,6 +27,7 @@ public class RouteController {
 
     private final RouteService routeService;
     private final CurrentUserService currentUserService;
+    private final S3Uploader s3Uploader; // ✅ 추가
 
     @Operation(
             summary = "루트 생성",
@@ -77,4 +77,5 @@ public class RouteController {
                     .body(new ApiResponse<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null));
         }
     }
+
 }
