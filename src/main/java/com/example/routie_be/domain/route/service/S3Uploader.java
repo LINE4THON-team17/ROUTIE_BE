@@ -43,16 +43,19 @@ public class S3Uploader {
         ensureAvailable();
 
         String originalFileName = multipartFile.getOriginalFilename();
-
         String uuid = UUID.randomUUID().toString();
         String uniqueFileName = uuid + "_" + originalFileName.replaceAll("\\s", "_");
 
         String fileName = dirName + "/" + uniqueFileName;
-        log.info("fileName: {}", fileName);
+
+        log.info("[S3Uploader] Upload start. bucket={}, key={}", bucket, fileName);
 
         File uploadFile = convert(multipartFile);
 
         String uploadImageUrl = putS3(uploadFile, fileName);
+
+        log.info("[S3Uploader] Upload success. url={}", uploadImageUrl);
+
         removeNewFile(uploadFile);
 
         return uploadImageUrl;
