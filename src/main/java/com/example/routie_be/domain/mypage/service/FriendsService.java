@@ -46,7 +46,7 @@ public class FriendsService {
         return follows.stream()
                 .map(UserFollow::getFolloweeId)
                 .map(userMap::get)
-                .filter(Objects::nonNull)
+                .filter(Objects::nonNull) // 삭제/비활성 사용자 대비
                 .map(u -> new FriendDto(u.getId(), u.getNickname(), u.getProfileImageUrl()))
                 .toList();
     }

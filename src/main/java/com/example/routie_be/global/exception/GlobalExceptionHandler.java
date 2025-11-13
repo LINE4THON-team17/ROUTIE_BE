@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import com.example.routie_be.global.common.ApiResponse;
@@ -26,12 +28,25 @@ import lombok.extern.slf4j.Slf4j;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // 디버그용 상세 노출 스위치 (기본 false)
     @Value("${app.error.expose-details:false}")
     private boolean exposeDetails;
 
     private ResponseEntity<ApiResponse<Object>> resp(int status, String message, Object data) {
         return ResponseEntity.status(status).body(new ApiResponse<>(status, message, data));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<Object>> handleResponseStatus(ResponseStatusException e) {
+        HttpStatusCode statusCode = e.getStatusCode();
+        int status = statusCode.value();
+        String message =
+                (e.getReason() != null && !e.getReason().isBlank())
+                        ? e.getReason()
+                        : "요청 처리 중 오류가 발생했습니다.";
+        Object data = exposeDetails ? Map.of("reason", e.getReason()) : null;
+
+        log.debug("[{}] ResponseStatusException: {}", status, e.getReason(), e);
+        return resp(status, message, data);
     }
 
     /** 400 - @Valid 바디 검증 실패 */
