@@ -22,10 +22,11 @@ public class S3Uploader {
     private final AmazonS3 amazonS3;
     private final String bucket;
 
-    public S3Uploader(AmazonS3 amazonS3, @Value("${cloud.aws.s3.bucket-name}") String bucket) {
+    public S3Uploader(AmazonS3 amazonS3, @Value("${cloud.aws.s3.bucket}") String bucket) {
         this.amazonS3 = amazonS3;
         this.bucket = bucket;
     }
+
     public String upload(MultipartFile multipartFile, String dirName) throws IOException {
         // 파일 이름에서 공백을 제거한 새로운 파일 이름 생성
         String originalFileName = multipartFile.getOriginalFilename();
@@ -62,8 +63,9 @@ public class S3Uploader {
     }
 
     private String putS3(File uploadFile, String fileName) {
-        amazonS3.putObject(new PutObjectRequest(bucket, fileName, uploadFile)
-                .withCannedAcl(CannedAccessControlList.PublicRead));
+        amazonS3.putObject(
+                new PutObjectRequest(bucket, fileName, uploadFile)
+                        .withCannedAcl(CannedAccessControlList.PublicRead));
         return amazonS3.getUrl(bucket, fileName).toString();
     }
 
@@ -86,7 +88,8 @@ public class S3Uploader {
         }
     }
 
-    public String updateFile(MultipartFile newFile, String oldFileName, String dirName) throws IOException {
+    public String updateFile(MultipartFile newFile, String oldFileName, String dirName)
+            throws IOException {
         // 기존 파일 삭제
         log.info("S3 oldFileName: " + oldFileName);
         deleteFile(oldFileName);

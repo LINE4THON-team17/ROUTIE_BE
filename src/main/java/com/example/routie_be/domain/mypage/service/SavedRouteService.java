@@ -1,11 +1,13 @@
 package com.example.routie_be.domain.mypage.service;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
 import com.example.routie_be.domain.mypage.entity.UserSavedRoute;
 import com.example.routie_be.domain.mypage.repository.SavedRouteRepo;
 import com.example.routie_be.global.common.ApiResponse;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -30,9 +32,7 @@ public class SavedRouteService {
             return new ApiResponse<>(HttpStatus.NOT_FOUND.value(), "저장되지 않은 루트입니다.", null);
         }
 
-        savedRouteRepo
-                .findAll()
-                .stream()
+        savedRouteRepo.findAll().stream()
                 .filter(s -> s.getUserId().equals(userId) && s.getRouteId().equals(routeId))
                 .findFirst()
                 .ifPresent(savedRouteRepo::delete);

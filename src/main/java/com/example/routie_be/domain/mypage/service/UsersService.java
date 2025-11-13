@@ -1,5 +1,13 @@
 package com.example.routie_be.domain.mypage.service;
 
+import java.util.List;
+import java.util.Objects;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.routie_be.domain.auth.entity.User;
 import com.example.routie_be.domain.auth.repository.UserRepository;
 import com.example.routie_be.domain.mypage.dto.RouteSummary;
@@ -11,14 +19,8 @@ import com.example.routie_be.domain.mypage.repository.FollowRepo;
 import com.example.routie_be.domain.mypage.repository.SavedRouteRepo;
 import com.example.routie_be.domain.mypage.repository.UserRepo;
 import com.example.routie_be.domain.route.repository.RouteRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Objects;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -83,13 +85,17 @@ public class UsersService {
                 savedRouteRepo.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
 
         return p.stream()
-                .map(saved -> routeRepository.findById(saved.getRouteId())
-                        .map(route -> new RouteSummary(
-                                route.getRouteId(),
-                                route.getTitle(), // ✅ 실제 루트 타이틀
-                                saved.getCreatedAt()
-                        ))
-                        .orElse(null)) // 삭제된 루트면 null
+                .map(
+                        saved ->
+                                routeRepository
+                                        .findById(saved.getRouteId())
+                                        .map(
+                                                route ->
+                                                        new RouteSummary(
+                                                                route.getRouteId(),
+                                                                route.getTitle(), // ✅ 실제 루트 타이틀
+                                                                saved.getCreatedAt()))
+                                        .orElse(null)) // 삭제된 루트면 null
                 .filter(Objects::nonNull) // null 제거
                 .toList();
     }

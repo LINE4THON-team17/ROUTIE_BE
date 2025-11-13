@@ -1,20 +1,22 @@
 package com.example.routie_be.domain.route.service;
 
-import com.example.routie_be.domain.route.dto.*;
-import com.example.routie_be.domain.route.entity.Place;
-import com.example.routie_be.domain.route.entity.Route;
-import com.example.routie_be.domain.route.repository.RouteRepository;
-import com.example.routie_be.global.common.ApiResponse;
-import lombok.RequiredArgsConstructor;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.example.routie_be.domain.route.dto.*;
+import com.example.routie_be.domain.route.entity.Place;
+import com.example.routie_be.domain.route.entity.Route;
+import com.example.routie_be.domain.route.repository.RouteRepository;
+import com.example.routie_be.global.common.ApiResponse;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -88,12 +90,13 @@ public class RouteService {
         return RouteDetailDto.from(route);
     }
 
-
     @Transactional
     public ApiResponse<String> deleteRoute(Long userId, Long routeId) {
         // 루트가 존재하는지 확인
-        Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 루트를 찾을 수 없습니다."));
+        Route route =
+                routeRepository
+                        .findById(routeId)
+                        .orElseThrow(() -> new IllegalArgumentException("해당 루트를 찾을 수 없습니다."));
 
         // 작성자 본인 확인
         if (!route.getUserId().equals(userId)) {
