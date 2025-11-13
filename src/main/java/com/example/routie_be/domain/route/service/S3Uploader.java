@@ -1,3 +1,5 @@
+// com.example.routie_be.domain.route.service.S3Uploader
+
 package com.example.routie_be.domain.route.service;
 
 import java.io.File;
@@ -24,25 +26,34 @@ public class S3Uploader {
     private final AmazonS3 amazonS3;
     private final String bucket;
 
-    public S3Uploader(AmazonS3 amazonS3, @Value("${cloud.aws.s3.bucket}") String bucket) {
+    public S3Uploader(
+            AmazonS3 amazonS3,
+            @Value("${cloud.aws.s3.bucket:${CLOUD_AWS_S3_BUCKET_NAME:}}") String bucket) {
+
+        if (bucket == null || bucket.isBlank()) {
+            throw new IllegalStateException(
+                    "S3 bucket name is not configured. "
+                            + "Please set 'cloud.aws.s3.bucket' or 'CLOUD_AWS_S3_BUCKET_NAME'");
+        }
+
         this.amazonS3 = amazonS3;
         this.bucket = bucket;
     }
 
     public String upload(MultipartFile multipartFile, String dirName) throws IOException {
-        // 파일 이름에서 공백을 제거한 새로운 파일 이름 생성
         String originalFileName = multipartFile.getOriginalFilename();
 
-        // UUID를 파일명에 추가
         String uuid = UUID.randomUUID().toString();
         String uniqueFileName = uuid + "_" + originalFileName.replaceAll("\\s", "_");
 
         String fileName = dirName + "/" + uniqueFileName;
-        log.info("fileName: " + fileName);
+        log.info("fileName: {}", fileName);
+
         File uploadFile = convert(multipartFile);
 
         String uploadImageUrl = putS3(uploadFile, fileName);
         removeNewFile(uploadFile);
+
         return uploadImageUrl;
     }
 
@@ -81,9 +92,8 @@ public class S3Uploader {
 
     public void deleteFile(String fileName) {
         try {
-            // URL 디코딩을 통해 원래의 파일 이름을 가져옵니다.
             String decodedFileName = URLDecoder.decode(fileName, "UTF-8");
-            log.info("Deleting file from S3: " + decodedFileName);
+            log.info("Deleting file from S3: {}", decodedFileName);
             amazonS3.deleteObject(bucket, decodedFileName);
         } catch (UnsupportedEncodingException e) {
             log.error("Error while decoding the file name: {}", e.getMessage());
@@ -92,10 +102,10 @@ public class S3Uploader {
 
     public String updateFile(MultipartFile newFile, String oldFileName, String dirName)
             throws IOException {
-        // 기존 파일 삭제
-        log.info("S3 oldFileName: " + oldFileName);
+
+        log.info("S3 oldFileName: {}", oldFileName);
         deleteFile(oldFileName);
-        // 새 파일 업로드
+
         return upload(newFile, dirName);
     }
 }
