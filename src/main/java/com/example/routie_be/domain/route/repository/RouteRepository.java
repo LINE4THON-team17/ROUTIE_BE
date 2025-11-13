@@ -21,4 +21,6 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     @Query(
             "SELECT r FROM Route r LEFT JOIN FETCH r.places p LEFT JOIN FETCH r.keywords k WHERE r.routeId = :routeId")
     Optional<Route> findByIdWithDetails(@Param("routeId") Long routeId);
+
+    long countByUserId(Long userId);
 }
