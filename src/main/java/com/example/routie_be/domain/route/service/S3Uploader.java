@@ -27,17 +27,20 @@ public class S3Uploader {
     private final String bucket;
 
     public S3Uploader(
-            AmazonS3 amazonS3,
-            @Value("${cloud.aws.s3.bucket:${CLOUD_AWS_S3_BUCKET_NAME:}}") String bucket) {
-
+        AmazonS3 amazonS3,
+        @Value("${cloud.aws.s3.bucket:${CLOUD_AWS_S3_BUCKET:${CLOUD_AWS_S3_BUCKET_NAME:}}}")
+        String bucket
+    ) {
         if (bucket == null || bucket.isBlank()) {
             throw new IllegalStateException(
-                    "S3 bucket name is not configured. "
-                            + "Please set 'cloud.aws.s3.bucket' or 'CLOUD_AWS_S3_BUCKET_NAME'");
+                "S3 bucket name is not configured. " +
+                    "Please set 'cloud.aws.s3.bucket' or 'CLOUD_AWS_S3_BUCKET' or 'CLOUD_AWS_S3_BUCKET_NAME'"
+            );
         }
 
         this.amazonS3 = amazonS3;
         this.bucket = bucket;
+        log.info("S3Uploader initialized with bucket={}", bucket);
     }
 
     public String upload(MultipartFile multipartFile, String dirName) throws IOException {
@@ -77,8 +80,8 @@ public class S3Uploader {
 
     private String putS3(File uploadFile, String fileName) {
         amazonS3.putObject(
-                new PutObjectRequest(bucket, fileName, uploadFile)
-                        .withCannedAcl(CannedAccessControlList.PublicRead));
+            new PutObjectRequest(bucket, fileName, uploadFile)
+                .withCannedAcl(CannedAccessControlList.PublicRead));
         return amazonS3.getUrl(bucket, fileName).toString();
     }
 
@@ -101,7 +104,7 @@ public class S3Uploader {
     }
 
     public String updateFile(MultipartFile newFile, String oldFileName, String dirName)
-            throws IOException {
+        throws IOException {
 
         log.info("S3 oldFileName: {}", oldFileName);
         deleteFile(oldFileName);
