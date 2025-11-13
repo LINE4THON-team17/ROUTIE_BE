@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.routie_be.domain.route.dto.RouteCreateRequest;
@@ -13,6 +12,7 @@ import com.example.routie_be.domain.route.dto.RouteDetailDto;
 import com.example.routie_be.domain.route.dto.RouteSummaryDto;
 import com.example.routie_be.domain.route.service.RouteService;
 import com.example.routie_be.global.common.ApiResponse;
+import com.example.routie_be.global.common.CurrentUserService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class RouteController {
 
     private final RouteService routeService;
+    private final CurrentUserService currentUserService;
 
     @Operation(
             summary = "루트 생성",
@@ -35,17 +36,9 @@ public class RouteController {
                             + "요청 본문에는 루트 제목, 대상, 키워드 목록, 방문 장소 리스트 등이 포함되어야 합니다.")
     @PostMapping
     public ResponseEntity<ApiResponse<RouteData>> createRoute(
-            @Parameter(hidden = true) @AuthenticationPrincipal Long userId,
             @Valid @RequestBody RouteCreateRequest request) {
 
-        if (userId == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(
-                            new ApiResponse<>(
-                                    HttpStatus.UNAUTHORIZED.value(),
-                                    "인증 정보(User ID)를 가져올 수 없습니다. 유효한 토큰인지 확인하세요.",
-                                    null));
-        }
+        Long userId = currentUserService.getUserId();
 
         ApiResponse<RouteData> response = routeService.createRoute(userId, request);
         return ResponseEntity.status(HttpStatus.OK).body(response);
