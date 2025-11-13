@@ -7,6 +7,7 @@ import com.example.routie_be.domain.route.repository.RouteRepository;
 import com.example.routie_be.global.common.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -85,5 +86,21 @@ public class RouteService {
                                         new IllegalArgumentException(
                                                 "해당 루트를 찾을 수 없습니다. ID: " + routeId));
         return RouteDetailDto.from(route);
+    }
+
+
+    @Transactional
+    public ApiResponse<String> deleteRoute(Long userId, Long routeId) {
+        // 루트가 존재하는지 확인
+        Route route = routeRepository.findById(routeId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 루트를 찾을 수 없습니다."));
+
+        // 작성자 본인 확인
+        if (!route.getUserId().equals(userId)) {
+            return new ApiResponse<>(HttpStatus.FORBIDDEN.value(), "본인이 작성한 루트만 삭제할 수 있습니다.", null);
+        }
+
+        routeRepository.delete(route);
+        return new ApiResponse<>(HttpStatus.OK.value(), "루트가 성공적으로 삭제되었습니다.", null);
     }
 }

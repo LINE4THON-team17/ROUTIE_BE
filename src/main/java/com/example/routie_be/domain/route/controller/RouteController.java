@@ -1,5 +1,6 @@
 package com.example.routie_be.domain.route.controller;
 
+import com.example.routie_be.domain.mypage.service.SavedRouteService;
 import com.example.routie_be.domain.route.dto.RouteCreateRequest;
 import com.example.routie_be.domain.route.dto.RouteData;
 import com.example.routie_be.domain.route.dto.RouteDetailDto;
@@ -76,6 +77,35 @@ public class RouteController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(new ApiResponse<>(HttpStatus.NOT_FOUND.value(), e.getMessage(), null));
         }
+    }
+
+
+    private final SavedRouteService savedRouteService;
+
+    // 루트 저장
+    @Operation(summary = "루트 저장", description = "다른 사용자의 루트를 내 저장 목록에 추가합니다.")
+    @PostMapping("/{routeId}/save")
+    public ResponseEntity<ApiResponse<String>> saveRoute(@PathVariable Long routeId) {
+        Long userId = currentUserService.getUserId();
+        ApiResponse<String> response = savedRouteService.saveRoute(userId, routeId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    // 루트 저장 취소
+    @Operation(summary = "루트 저장 취소", description = "저장한 루트를 삭제합니다.")
+    @DeleteMapping("/{routeId}/save")
+    public ResponseEntity<ApiResponse<String>> unsaveRoute(@PathVariable Long routeId) {
+        Long userId = currentUserService.getUserId();
+        ApiResponse<String> response = savedRouteService.unsaveRoute(userId, routeId);
+        return ResponseEntity.status(response.getStatus()).body(response);
+    }
+
+    @Operation(summary = "루트 삭제", description = "본인이 작성한 루트를 삭제합니다.")
+    @DeleteMapping("/{routeId}")
+    public ResponseEntity<ApiResponse<String>> deleteRoute(@PathVariable Long routeId) {
+        Long userId = currentUserService.getUserId();
+        ApiResponse<String> response = routeService.deleteRoute(userId, routeId);
+        return ResponseEntity.status(response.getStatus()).body(response);
     }
 
 }
