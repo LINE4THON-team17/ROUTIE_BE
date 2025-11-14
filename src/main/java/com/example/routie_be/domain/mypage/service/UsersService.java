@@ -41,7 +41,7 @@ public class UsersService {
 
         long routesCount = routeRepository.countByUserId(userId);
         long savedCount = savedRouteRepo.countByUserId(userId);
-        long friendsCount = followRepo.countByFolloweeId(userId);
+        long friendsCount = followRepo.countByFollowerId(userId);
 
         return new UserMeResponse(
                 u.getId(),
@@ -70,7 +70,7 @@ public class UsersService {
 
         long routesCount = 0L;
         long savedCount = savedRouteRepo.countByUserId(userId);
-        long friendsCount = followRepo.countByFolloweeId(userId);
+        long friendsCount = followRepo.countByFollowerId(userId);
 
         return new UserMeResponse(
                 user.getId(),

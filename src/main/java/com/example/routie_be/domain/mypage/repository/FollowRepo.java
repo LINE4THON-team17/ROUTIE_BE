@@ -14,5 +14,5 @@ public interface FollowRepo extends JpaRepository<UserFollow, Long> {
 
     List<UserFollow> findByFollowerIdOrderByCreatedAtDesc(Long followerId);
 
-    long countByFolloweeId(Long followeeId);
+    long countByFollowerId(Long followerId);
 }
