@@ -12,6 +12,7 @@ import com.example.routie_be.domain.auth.entity.User;
 import com.example.routie_be.domain.auth.repository.UserRepository;
 import com.example.routie_be.domain.mypage.dto.RouteSummary;
 import com.example.routie_be.domain.mypage.dto.UserMeResponse;
+import com.example.routie_be.domain.mypage.dto.UserProfileResponse;
 import com.example.routie_be.domain.mypage.dto.UserUpdateRequest;
 import com.example.routie_be.domain.mypage.entity.MypageUser;
 import com.example.routie_be.domain.mypage.entity.UserSavedRoute;
@@ -33,6 +34,7 @@ public class UsersService {
     private final UserRepository userRepository;
     private final RouteRepository routeRepository;
 
+    /** 내 프로필 조회 */
     public UserMeResponse getProfile(Long userId) {
         MypageUser u =
                 userRepo.findById(userId)
@@ -51,6 +53,28 @@ public class UsersService {
                 friendsCount);
     }
 
+    /** 다른 유저 프로필 조회 (프로필 화면) viewerId = 현재 로그인한 나 targetId = 조회 대상 유저 */
+    @Transactional(readOnly = true)
+    public UserProfileResponse getUserProfile(Long viewerId, Long targetId) {
+        MypageUser u =
+                userRepo.findById(targetId)
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        long routesCount = routeRepository.countByUserId(targetId);
+        long friendsCount = followRepo.countByFollowerId(targetId);
+
+        boolean isFriend = followRepo.existsByFollowerIdAndFolloweeId(viewerId, targetId);
+
+        return new UserProfileResponse(
+                u.getId(),
+                u.getNickname(),
+                u.getProfileImageUrl(),
+                routesCount,
+                friendsCount,
+                isFriend);
+    }
+
+    /** 내 프로필 수정 */
     @Transactional
     public UserMeResponse updateProfile(Long userId, UserUpdateRequest dto) {
         User user =
@@ -80,6 +104,7 @@ public class UsersService {
                 friendsCount);
     }
 
+    /** 내가 저장한 루트 목록 조회 */
     public List<RouteSummary> getSavedRoutes(Long userId, int page, int size) {
         Page<UserSavedRoute> p =
                 savedRouteRepo.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
