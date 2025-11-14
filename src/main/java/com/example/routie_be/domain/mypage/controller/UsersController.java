@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.routie_be.domain.mypage.dto.RouteSummary;
 import com.example.routie_be.domain.mypage.dto.UserMeResponse;
+import com.example.routie_be.domain.mypage.dto.UserProfileResponse;
 import com.example.routie_be.domain.mypage.dto.UserUpdateRequest;
 import com.example.routie_be.domain.mypage.service.SavedRouteService;
 import com.example.routie_be.domain.mypage.service.UsersService;
