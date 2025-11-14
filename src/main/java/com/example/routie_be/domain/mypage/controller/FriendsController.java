@@ -33,11 +33,11 @@ public class FriendsController {
             summary = "내 친구 목록 조회",
             description =
                     """
-          현재 로그인한 사용자가 **팔로우한 사용자 목록**을 조회합니다.
+현재 로그인한 사용자가 **팔로우한 사용자 목록**을 조회합니다.
 
-          - 정렬/페이지 파라미터는 추후 확장 가능
-          - 응답은 FriendDto 배열입니다.
-          """,
+- 정렬/페이지 파라미터는 추후 확장 가능
+- 응답은 FriendDto 배열입니다.
+""",
             responses = {
                 @ApiResponse(
                         responseCode = "200",
@@ -56,21 +56,21 @@ public class FriendsController {
                                                         name = "friends-example",
                                                         value =
                                                                 """
-                      [
-                        {
-                          "id": 12,
-                          "nickname": "루루",
-                          "profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png",
-                          "friendDays": 25
-                        },
-                        {
-                          "id": 34,
-                          "nickname": "티티",
-                          "profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/routie.png",
-                          "friendDays": 3
-                        }
-                      ]
-                      """)))
+[
+{
+"id": 12,
+"nickname": "루루",
+"profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png",
+"friendDays": 25
+},
+{
+"id": 34,
+"nickname": "티티",
+"profileImage": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/routie.png",
+"friendDays": 3
+}
+]
+""")))
             })
     @GetMapping("/me/friends")
     public ResponseEntity<List<FriendDto>> getFriends() {
@@ -78,17 +78,31 @@ public class FriendsController {
     }
 
     @Operation(
+            summary = "특정 사용자가 팔로우한 친구 목록 조회",
+            description =
+                    """
+              특정 사용자(userId)가 팔로우한 사용자 목록을 조회합니다.<br><br>
+              - 내 친구 목록은 /api/users/me/friends 사용<br>
+              - 여기서는 userId 프로필 화면에서 '친구 15명' 눌렀을 때 쓰는 용도
+              """)
+    @GetMapping("/{userId}/friends")
+    public ResponseEntity<List<FriendDto>> getUserFriends(
+            @Parameter(description = "대상 사용자 ID", example = "42") @PathVariable Long userId) {
+        return ResponseEntity.ok(friendsService.list(userId));
+    }
+
+    @Operation(
             summary = "팔로우",
             description =
                     """
-          지정한 사용자 **userId**를 팔로우합니다.
+지정한 사용자 **userId**를 팔로우합니다.
 
-          - Path Variable로 대상 사용자 ID를 전달합니다.
-          - 이미 팔로우 중이면 400을 반환하도록 서비스 레벨에서 처리하세요.
+- Path Variable로 대상 사용자 ID를 전달합니다.
+- 이미 팔로우 중이면 400을 반환하도록 서비스 레벨에서 처리하세요.
 
-          예시 요청:
-          - `POST /api/users/42/follow`
-          """,
+예시 요청:
+- `POST /api/users/42/follow`
+""",
             responses = {
                 @ApiResponse(responseCode = "200", description = "팔로우 성공"),
                 @ApiResponse(responseCode = "400", description = "이미 팔로우 중인 경우"),
@@ -105,14 +119,14 @@ public class FriendsController {
             summary = "언팔로우",
             description =
                     """
-          지정한 사용자 **userId**를 언팔로우합니다.
+지정한 사용자 **userId**를 언팔로우합니다.
 
-          - Path Variable로 대상 사용자 ID를 전달합니다.
-          - 팔로우 중이 아니라면 400을 반환하도록 서비스 레벨에서 처리하세요.
+- Path Variable로 대상 사용자 ID를 전달합니다.
+- 팔로우 중이 아니라면 400을 반환하도록 서비스 레벨에서 처리하세요.
 
-          예시 요청:
-          - `DELETE /api/users/42/follow`
-          """,
+예시 요청:
+- `DELETE /api/users/42/follow`
+""",
             responses = {
                 @ApiResponse(responseCode = "200", description = "언팔로우 성공"),
                 @ApiResponse(responseCode = "400", description = "팔로우 중이 아닌 경우"),
@@ -129,14 +143,14 @@ public class FriendsController {
             summary = "팔로우 상태 조회",
             description =
                     """
-          특정 사용자 **userId**와의 **팔로우 관계 상태**를 조회합니다.
+특정 사용자 **userId**와의 **팔로우 관계 상태**를 조회합니다.
 
-          - `isFollowing`: 내가 해당 유저를 팔로우 중인지
-          - `isFollowedBy`: 해당 유저가 나를 팔로우하는지 (서로 팔로우 여부 확인에 유용)
+- `isFollowing`: 내가 해당 유저를 팔로우 중인지
+- `isFollowedBy`: 해당 유저가 나를 팔로우하는지 (서로 팔로우 여부 확인에 유용)
 
-          예시 요청:
-          - `GET /api/users/42/follow-status`
-          """,
+예시 요청:
+- `GET /api/users/42/follow-status`
+""",
             responses = {
                 @ApiResponse(
                         responseCode = "200",
@@ -150,11 +164,11 @@ public class FriendsController {
                                                         name = "status-example",
                                                         value =
                                                                 """
-                      {
-                        "isFollowing": true,
-                        "isFollowedBy": false
-                      }
-                      """))),
+{
+"isFollowing": true,
+"isFollowedBy": false
+}
+"""))),
                 @ApiResponse(responseCode = "404", description = "해당 userId가 존재하지 않음")
             })
     @GetMapping("/{userId}/follow-status")

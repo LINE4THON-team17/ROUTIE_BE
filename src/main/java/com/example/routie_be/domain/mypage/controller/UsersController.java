@@ -46,10 +46,10 @@ public class UsersController {
             summary = "내 프로필 조회",
             description =
                     """
-          현재 로그인한 사용자의 프로필 정보를 조회합니다.<br><br>
-          - JWT 기반 인증이 완료된 사용자만 접근 가능<br>
-          - 닉네임, 프로필 이미지, 가입일 등 기본 정보 반환
-          """,
+현재 로그인한 사용자의 프로필 정보를 조회합니다.<br><br>
+- JWT 기반 인증이 완료된 사용자만 접근 가능<br>
+- 닉네임, 프로필 이미지, 가입일 등 기본 정보 반환
+""",
             responses = {
                 @ApiResponse(
                         responseCode = "200",
@@ -62,15 +62,15 @@ public class UsersController {
                                                 @ExampleObject(
                                                         value =
                                                                 """
-                      {
-                        "id": 7,
-                        "nickname": "루티",
-                        "email": "routie@example.com",
-                        "profileImageUrl": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/routie.png",
-                        "friendDays": 42,
-                        "badgeCount": 3
-                      }
-                      """)))
+{
+"id": 7,
+"nickname": "루티",
+"email": "routie@example.com",
+"profileImageUrl": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/routie.png",
+"friendDays": 42,
+"badgeCount": 3
+}
+""")))
             })
     @GetMapping("/me")
     public ResponseEntity<UserMeResponse> getMyProfile() {
@@ -81,10 +81,10 @@ public class UsersController {
             summary = "프로필 수정",
             description =
                     """
-          내 프로필 정보를 수정합니다.<br><br>
-          - 닉네임, 프로필 이미지 변경 가능<br>
-          - 요청 Body로 `UserUpdateRequest` JSON 전달
-          """,
+내 프로필 정보를 수정합니다.<br><br>
+- 닉네임, 프로필 이미지 변경 가능<br>
+- 요청 Body로 `UserUpdateRequest` JSON 전달
+""",
             requestBody =
                     @io.swagger.v3.oas.annotations.parameters.RequestBody(
                             required = true,
@@ -100,11 +100,11 @@ public class UsersController {
                                                     @ExampleObject(
                                                             value =
                                                                     """
-                  {
-                    "nickname": "루루",
-                    "profileImageUrl": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png"
-                  }
-                  """))),
+{
+"nickname": "루루",
+"profileImageUrl": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png"
+}
+"""))),
             responses = {
                 @ApiResponse(
                         responseCode = "200",
@@ -117,15 +117,15 @@ public class UsersController {
                                                 @ExampleObject(
                                                         value =
                                                                 """
-                      {
-                        "id": 7,
-                        "nickname": "티티",
-                        "email": "routie@example.com",
-                        "profileImageUrl": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png",
-                        "friendDays": 42,
-                        "badgeCount": 3
-                      }
-                      """))),
+{
+"id": 7,
+"nickname": "티티",
+"email": "routie@example.com",
+"profileImageUrl": "https://routie.s3.ap-northeast-2.amazonaws.com/profile/pickle.png",
+"friendDays": 42,
+"badgeCount": 3
+}
+"""))),
                 @ApiResponse(responseCode = "400", description = "유효하지 않은 입력값 (예: 닉네임 중복)")
             })
     @PatchMapping("/me")
@@ -134,13 +134,27 @@ public class UsersController {
     }
 
     @Operation(
+            summary = "다른 사용자(친구) 프로필 조회",
+            description =
+                    """
+              특정 사용자의 프로필 정보를 조회합니다.<br><br>
+              - JWT 인증 필요<br>
+              - 친구 여부(isFriend)는 '내가 이 유저를 팔로우 했는지' 기준입니다.
+              """)
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable Long userId) {
+        Long me = current.getUserId(); // 현재 로그인한 사용자
+        return ResponseEntity.ok(usersService.getUserProfile(me, userId));
+    }
+
+    @Operation(
             summary = "저장한 루트 목록 조회",
             description =
                     """
-          내가 저장(북마크)한 루트 목록을 조회합니다.<br><br>
-          - 페이징 파라미터 제공 (`page`, `size`)<br>
-          - 응답은 `RouteSummary` 리스트로 반환
-          """,
+내가 저장(북마크)한 루트 목록을 조회합니다.<br><br>
+- 페이징 파라미터 제공 (`page`, `size`)<br>
+- 응답은 `RouteSummary` 리스트로 반환
+""",
             parameters = {
                 @Parameter(name = "page", description = "페이지 번호 (0부터 시작)", example = "0"),
                 @Parameter(name = "size", description = "한 페이지당 조회 개수", example = "20")
@@ -163,25 +177,25 @@ public class UsersController {
                                                 @ExampleObject(
                                                         value =
                                                                 """
-                      [
-                        {
-                          "id": 101,
-                          "title": "서울 도심 루트",
-                          "thumbnail": "https://routie.s3.ap-northeast-2.amazonaws.com/route/thumb1.png",
-                          "distance": 5.2,
-                          "duration": 45,
-                          "isSaved": true
-                        },
-                        {
-                          "id": 205,
-                          "title": "한강 자전거 루트",
-                          "thumbnail": "https://routie.s3.ap-northeast-2.amazonaws.com/route/thumb2.png",
-                          "distance": 12.8,
-                          "duration": 90,
-                          "isSaved": true
-                        }
-                      ]
-                      """)))
+[
+{
+"id": 101,
+"title": "서울 도심 루트",
+"thumbnail": "https://routie.s3.ap-northeast-2.amazonaws.com/route/thumb1.png",
+"distance": 5.2,
+"duration": 45,
+"isSaved": true
+},
+{
+"id": 205,
+"title": "한강 자전거 루트",
+"thumbnail": "https://routie.s3.ap-northeast-2.amazonaws.com/route/thumb2.png",
+"distance": 12.8,
+"duration": 90,
+"isSaved": true
+}
+]
+""")))
             })
     @GetMapping("/me/saved")
     public ResponseEntity<List<RouteSummary>> getSavedRoutes(
