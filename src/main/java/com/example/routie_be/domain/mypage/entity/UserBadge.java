@@ -6,21 +6,21 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(
-        name = "user_badge",
-        uniqueConstraints =
-                @UniqueConstraint(
-                        name = "uk_user_badge",
-                        columnNames = {"userId", "badgeId"}))
+    name = "user_badge",
+    uniqueConstraints =
+    @UniqueConstraint(
+        name = "uk_user_badge",
+        columnNames = {"user_id", "badge_id"}))
 public class UserBadge {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(name = "badge_id", nullable = false)
     private Long badgeId;
 
     @Column(nullable = false, updatable = false)
