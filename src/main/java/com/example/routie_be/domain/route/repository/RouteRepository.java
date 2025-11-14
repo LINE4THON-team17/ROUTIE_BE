@@ -28,5 +28,4 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
 
     // 추가한 부분 - 내가 만든 루트 페이징 조회 (createdAt desc)
     Page<Route> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
-
 }

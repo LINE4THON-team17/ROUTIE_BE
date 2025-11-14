@@ -105,17 +105,13 @@ public class UsersService {
 
         Page<Route> routes =
                 routeRepository.findByUserIdOrderByCreatedAtDesc(
-                        userId,
-                        PageRequest.of(page, size)
-                );
+                        userId, PageRequest.of(page, size));
 
         return routes.stream()
-                .map(route ->
-                        new RouteSummary(
-                                route.getRouteId(),
-                                route.getTitle(),
-                                route.getCreatedAt()
-                        )
-                ).toList();
+                .map(
+                        route ->
+                                new RouteSummary(
+                                        route.getRouteId(), route.getTitle(), route.getCreatedAt()))
+                .toList();
     }
 }
