@@ -18,6 +18,7 @@ import com.example.routie_be.domain.mypage.entity.UserSavedRoute;
 import com.example.routie_be.domain.mypage.repository.FollowRepo;
 import com.example.routie_be.domain.mypage.repository.SavedRouteRepo;
 import com.example.routie_be.domain.mypage.repository.UserRepo;
+import com.example.routie_be.domain.route.entity.Route;
 import com.example.routie_be.domain.route.repository.RouteRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -97,6 +98,20 @@ public class UsersService {
                                                                 saved.getCreatedAt()))
                                         .orElse(null)) // 삭제된 루트면 null
                 .filter(Objects::nonNull) // null 제거
+                .toList();
+    }
+
+    public List<RouteSummary> getMyRoutes(Long userId, int page, int size) {
+
+        Page<Route> routes =
+                routeRepository.findByUserIdOrderByCreatedAtDesc(
+                        userId, PageRequest.of(page, size));
+
+        return routes.stream()
+                .map(
+                        route ->
+                                new RouteSummary(
+                                        route.getRouteId(), route.getTitle(), route.getCreatedAt()))
                 .toList();
     }
 }
