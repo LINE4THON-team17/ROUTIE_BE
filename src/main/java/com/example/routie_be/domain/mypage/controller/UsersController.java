@@ -3,11 +3,22 @@ package com.example.routie_be.domain.mypage.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.example.routie_be.domain.mypage.dto.*;
+import com.example.routie_be.domain.mypage.dto.RouteSummary;
+import com.example.routie_be.domain.mypage.dto.UserMeResponse;
+import com.example.routie_be.domain.mypage.dto.UserUpdateRequest;
+import com.example.routie_be.domain.mypage.service.SavedRouteService;
 import com.example.routie_be.domain.mypage.service.UsersService;
 import com.example.routie_be.global.common.CurrentUserService;
+import com.example.routie_be.security.UserPrincipal;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -177,5 +188,41 @@ public class UsersController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(usersService.getSavedRoutes(current.getUserId(), page, size));
+    }
+
+    private final SavedRouteService savedRouteService;
+
+    // 추가한 부분 - 루트 저장 여부 확인 API
+    @Operation(
+            summary = "루트 저장 여부 확인",
+            description = "특정 루트가 현재 로그인한 사용자에 의해 저장되었는지 여부를 확인합니다.",
+            parameters = {
+                @Parameter(name = "routeId", description = "저장 여부를 확인할 루트의 ID", example = "101")
+            })
+    @GetMapping("/{routeId}/check")
+    public ResponseEntity<Boolean> checkRouteSavedStatus(
+            @PathVariable Long routeId, @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Long userId = userPrincipal.id(); // 또는 userPrincipal.getId();
+
+        boolean isSaved = savedRouteService.isRouteSaved(userId, routeId);
+
+        return ResponseEntity.ok(isSaved);
+    }
+
+    // 추가한 부분 - 내가 만든 루트 목록 조회 API
+    @Operation(summary = "내가 만든 루트 목록 조회", description = "현재 로그인한 사용자가 생성한 루트 목록을 페이징하여 조회합니다.")
+    @GetMapping("/me/routes")
+    public ResponseEntity<List<RouteSummary>> getMyRoutes(
+            @Parameter(description = "페이지 번호 (0부터 시작)", example = "0")
+                    @RequestParam(defaultValue = "0")
+                    int page,
+            @Parameter(description = "한 페이지당 조회 개수", example = "20")
+                    @RequestParam(defaultValue = "20")
+                    int size) {
+
+        Long userId = current.getUserId();
+
+        return ResponseEntity.ok(usersService.getMyRoutes(userId, page, size));
     }
 }

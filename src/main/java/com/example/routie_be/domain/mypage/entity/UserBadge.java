@@ -10,17 +10,17 @@ import jakarta.persistence.*;
         uniqueConstraints =
                 @UniqueConstraint(
                         name = "uk_user_badge",
-                        columnNames = {"userId", "badgeId"}))
+                        columnNames = {"user_id", "badge_id"}))
 public class UserBadge {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "user_id", nullable = false)
     private Long userId;
 
-    @Column(nullable = false)
+    @Column(name = "badge_id", nullable = false)
     private Long badgeId;
 
     @Column(nullable = false, updatable = false)

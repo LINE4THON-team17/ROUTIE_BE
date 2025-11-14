@@ -39,4 +39,10 @@ public class SavedRouteService {
 
         return new ApiResponse<>(HttpStatus.OK.value(), "루트 저장 취소 성공", null);
     }
+
+    // 루트 저장 여부 확인 (t/f 리턴)
+    public boolean isRouteSaved(Long userId, Long routeId) {
+        // Repository의 existsBy... 메서드를 호출하여 저장 여부를 확인합니다.
+        return savedRouteRepo.existsByUserIdAndRouteId(userId, routeId);
+    }
 }
