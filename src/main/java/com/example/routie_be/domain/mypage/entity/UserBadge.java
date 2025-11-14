@@ -6,11 +6,11 @@ import jakarta.persistence.*;
 
 @Entity
 @Table(
-    name = "user_badge",
-    uniqueConstraints =
-    @UniqueConstraint(
-        name = "uk_user_badge",
-        columnNames = {"user_id", "badge_id"}))
+        name = "user_badge",
+        uniqueConstraints =
+                @UniqueConstraint(
+                        name = "uk_user_badge",
+                        columnNames = {"user_id", "badge_id"}))
 public class UserBadge {
 
     @Id
