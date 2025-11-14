@@ -3,11 +3,22 @@ package com.example.routie_be.domain.mypage.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.example.routie_be.domain.mypage.dto.*;
+import com.example.routie_be.domain.mypage.dto.RouteSummary;
+import com.example.routie_be.domain.mypage.dto.UserMeResponse;
+import com.example.routie_be.domain.mypage.dto.UserUpdateRequest;
+import com.example.routie_be.domain.mypage.service.SavedRouteService;
 import com.example.routie_be.domain.mypage.service.UsersService;
 import com.example.routie_be.global.common.CurrentUserService;
+import com.example.routie_be.security.UserPrincipal;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -178,4 +189,19 @@ public class UsersController {
             @RequestParam(defaultValue = "20") int size) {
         return ResponseEntity.ok(usersService.getSavedRoutes(current.getUserId(), page, size));
     }
+
+    private final SavedRouteService savedRouteService;
+
+    @GetMapping("/{routeId}/check")
+    public ResponseEntity<Boolean> checkRouteSavedStatus(
+            @PathVariable Long routeId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal) {
+
+        Long userId = userPrincipal.id(); // 또는 userPrincipal.getId();
+
+        boolean isSaved = savedRouteService.isRouteSaved(userId, routeId);
+
+        return ResponseEntity.ok(isSaved);
+    }
+
 }
