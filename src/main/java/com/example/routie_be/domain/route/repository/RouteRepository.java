@@ -3,6 +3,8 @@ package com.example.routie_be.domain.route.repository;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -23,4 +25,8 @@ public interface RouteRepository extends JpaRepository<Route, Long> {
     Optional<Route> findByIdWithDetails(@Param("routeId") Long routeId);
 
     long countByUserId(Long userId);
+
+    // 추가한 부분 - 내가 만든 루트 페이징 조회 (createdAt desc)
+    Page<Route> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
+
 }
